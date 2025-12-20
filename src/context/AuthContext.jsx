@@ -10,15 +10,36 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Function to fetch fresh user data
+    const fetchUser = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            // Use axios directly or a dedicated api call (circular dependency warning with authApi if not careful)
+            const response = await axios.get("http://localhost:5000/api/auth/me", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.data.success) {
+                setUser(response.data.user);
+                localStorage.setItem("user", JSON.stringify(response.data.user));
+            }
+        } catch (error) {
+            console.error("Failed to fetch user", error);
+            if (error.response?.status === 401) logout();
+        }
+    };
+
     // Initialize Auth State from Token
     useEffect(() => {
         const checkAuth = async () => {
             const token = localStorage.getItem("token");
             const storedUser = localStorage.getItem("user");
 
-            if (token && storedUser) {
-                setUser(JSON.parse(storedUser));
-                // Optional: Verify token with backend /me endpoint here
+            if (token) {
+                if (storedUser) setUser(JSON.parse(storedUser));
+                await fetchUser(); // Always refresh to get latest savedRecipes
             }
             setLoading(false);
         };
@@ -63,7 +84,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, loading, fetchUser }}>
             {!loading && children}
         </AuthContext.Provider>
     );

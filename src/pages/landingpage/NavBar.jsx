@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 
 const NavBar = () => {
@@ -20,7 +21,9 @@ const NavBar = () => {
 
       {/* CTA */}
       <div className="hidden md:block">
-        <Button variant="primary">Login now</Button>
+        <Link to="/login">
+          <Button variant="primary">Login now</Button>
+        </Link>
       </div>
 
       {/* Mobile Button */}
@@ -37,7 +40,9 @@ const NavBar = () => {
           <a href="#" className="text-gray-600">Features</a>
           <a href="#" className="text-orange-500 font-bold">Recipes</a>
           <a href="#" className="text-gray-600">Reviews</a>
-          <Button variant="primary" className="w-full">Login now</Button>
+          <Link to="/login" className="w-full">
+            <Button variant="primary" className="w-full">Login now</Button>
+          </Link>
         </div>
       )}
     </nav>
