@@ -2,17 +2,20 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useRecipe, useToggleSaveRecipe } from '../../hooks/useRecipes';
 import { useAuth } from '../../context/AuthContext';
-import NavBar from '../landingpage/NavBar';
-import Footer from '../../components/landing/Footer';
+import Navbar from '../../components/common/Navbar';  // ✅ Home navbar
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
+import CookingMode from '../../components/recipes/CookingMode';
 
 const RecipeDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const { user } = useAuth();
-    const { data: recipe, isLoading, error } = useRecipe(id);
-    const toggleSaveMutation = useToggleSaveRecipe();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: recipe, isLoading, error } = useRecipe(id);
+  const toggleSaveMutation = useToggleSaveRecipe();
+
+  // ...rest of the component
+
 
     const isSaved = user?.savedRecipes?.some(r => r === id || r._id === id); // Handle ID or object population
 
@@ -37,7 +40,7 @@ const RecipeDetail = () => {
 
     return (
         <div className="min-h-screen bg-white font-sans">
-            <NavBar />
+            <Navbar />
 
             {/* Hero Image */}
             <div className="relative h-[400px] w-full">
@@ -98,16 +101,7 @@ const RecipeDetail = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-6">
-                                {recipe.steps && recipe.steps.map((step, idx) => (
-                                    <div key={idx} className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold">
-                                            {idx + 1}
-                                        </div>
-                                        <p className="text-gray-700 mt-1">{step}</p>
-                                    </div>
-                                ))}
-                            </div>
+                            <CookingMode steps={recipe.steps} />
                         )}
                     </section>
                 </div>
@@ -148,7 +142,7 @@ const RecipeDetail = () => {
                 </div>
             </div>
 
-            <Footer />
+            
         </div>
     );
 };
