@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useRecipes } from '../hooks/useRecipes';
 import Navbar from '../components/common/Navbar';
 import RecipeGridCard from '../components/recipes/RecipeGridCard';
+import Footer from '.././components/landing/Footer';
 
 const Recipes = () => {
     const { data: recipes, isLoading, error } = useRecipes();
@@ -128,6 +129,8 @@ const Recipes = () => {
                     </div>
                 )}
             </div>
+             {/* Footer */}
+        <Footer />
         </div>
     );
 };
