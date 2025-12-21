@@ -10,6 +10,7 @@ import AdminRoute from "./AdminRoute";
 import RecipeDetail from "../pages/recipes/RecipeDetail";
 import AddRecipe from "../pages/admin/AddRecipe";
 import Recipes from "../pages/Recipes";
+import Challenges from "../pages/Challenges";
 
 const AppRouter = () => {
   return (
@@ -19,6 +20,8 @@ const AppRouter = () => {
         <Route path="/" element={<Welcome />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/recipes/:id" element={<RecipeDetail />} />
+        <Route path="/challenges" element={<Challenges />} />
+        
 
         {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
