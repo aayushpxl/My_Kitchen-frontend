@@ -1,7 +1,9 @@
 import api from "./api";
 
-export const registerUserApi = (data) =>
+export const registerUser = (data) =>
   api.post("/auth/register", data);
 
-export const loginUserApi = (data) =>
+export const loginUser = (data) =>
   api.post("/auth/login", data);
+
+export const getMe = () => api.get("/auth/me");

@@ -98,37 +98,58 @@ const Recipes = () => {
             </div>
 
             {/* Recipe Grid */}
-            <div className="container mx-auto px-4 py-8 pb-24">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-xl font-bold text-gray-400 uppercase tracking-wide">All recipes</h2>
-                    <span className="text-sm text-gray-400">{filteredRecipes?.length || 0} results</span>
-                </div>
+            {/* Recipe Grid */}
+<div className="container mx-auto px-4 py-8 pb-24">
+  <div className="flex justify-between items-center mb-6">
+    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+      All recipes
+    </h2>
+    <span className="text-sm text-gray-400">
+      {filteredRecipes?.length || 0} results
+    </span>
+  </div>
 
-                {isLoading ? (
-                    <div className="text-center py-20">Loading...</div>
-                ) : error ? (
-                    <div className="text-center py-20 text-red-500">Error loading recipes</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                        {filteredRecipes?.map(recipe => (
-                            <RecipeGridCard key={recipe._id} recipe={recipe} />
-                        ))}
-                    </div>
-                )}
+  {isLoading ? (
+    <div className="text-center py-20">Loading...</div>
+  ) : error ? (
+    <div className="text-center py-20 text-red-500">
+      Error loading recipes
+    </div>
+  ) : (
+    <div
+      className="
+        grid
+        grid-cols-1
+        sm:grid-cols-2
+        lg:grid-cols-4
+        gap-5
+      "
+    >
+      {filteredRecipes?.map(recipe => (
+        <RecipeGridCard key={recipe._id} recipe={recipe} />
+      ))}
+    </div>
+  )}
 
-                {/* Empty State */}
-                {!isLoading && filteredRecipes?.length === 0 && (
-                    <div className="text-center py-20 bg-gray-50 rounded-3xl">
-                        <p className="text-gray-500 text-lg">No recipes found matching your criteria.</p>
-                        <button
-                            onClick={() => { setSearchTerm(''); setActiveFilter('All Types'); }}
-                            className="mt-4 text-orange-500 hover:text-orange-600 font-bold underline"
-                        >
-                            Clear filters
-                        </button>
-                    </div>
-                )}
-            </div>
+  {/* Empty State */}
+  {!isLoading && filteredRecipes?.length === 0 && (
+    <div className="text-center py-16 bg-gray-50 rounded-2xl mt-10">
+      <p className="text-gray-500 text-base">
+        No recipes found matching your criteria.
+      </p>
+      <button
+        onClick={() => {
+          setSearchTerm('');
+          setActiveFilter('All Types');
+        }}
+        className="mt-3 text-orange-500 hover:text-orange-600 font-semibold"
+      >
+        Clear filters
+      </button>
+    </div>
+  )}
+</div>
+
              {/* Footer */}
         <Footer />
         </div>

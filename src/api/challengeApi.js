@@ -1,16 +1,10 @@
-import axios from "axios";
+import api from "./api";
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, 
-});
+// Fetch all active challenges
+export const getActiveChallenges = () => api.get("/challenges");
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) req.headers.Authorization = `Bearer ${token}`;
-  return req;
-});
+// Join a specific challenge
+export const joinChallenge = (challengeId) => api.post(`/challenges/${challengeId}/join`);
 
-export const fetchChallengesApi = () => API.get("/challenges");
-export const joinChallengeApi = (challengeId) =>
-  API.post(`/challenges/${challengeId}/join`);
-export const fetchMyChallengesApi = () => API.get("/challenges/my");
+// Get user's joined challenges
+export const getMyChallenges = () => api.get("/challenges/my");

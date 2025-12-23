@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ChallengeCard from "../components/challenge/ChallengeCard";
 import ChallengeSearchBar from "../components/challenge/ChallengeSearchBar"; 
-import { useChallenges } from "../hooks/useChallenges";
+import { useChallenges } from "../hooks/challenge/useChallenges";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/landing/Footer";
 import ScrollFade from "../components/ui/ScrollFade";

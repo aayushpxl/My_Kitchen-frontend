@@ -1,91 +1,131 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-// import { loginUser, registerUser } from "../api/authApi"; // Will use direct axios for simplicity or integrate later
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+// Centralized API instance
+const api = axios.create({
+  baseURL: "http://localhost:5000/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    // Function to fetch fresh user data
-    const fetchUser = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) return;
+  // Attach token automatically
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
 
-            // Use axios directly or a dedicated api call (circular dependency warning with authApi if not careful)
-            const response = await axios.get("http://localhost:5000/api/auth/me", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+  // Fetch logged-in user
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("/auth/me");
 
-            if (response.data.success) {
-                setUser(response.data.user);
-                localStorage.setItem("user", JSON.stringify(response.data.user));
-            }
-        } catch (error) {
-            console.error("Failed to fetch user", error);
-            if (error.response?.status === 401) logout();
-        }
+      if (response.data?.success) {
+        setUser(response.data.user);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
+    } catch (error) {
+      console.error("Failed to fetch user", error);
+      if (error.response?.status === 401) {
+        logout();
+      }
+    }
+  };
+
+  // Initialize auth on app load
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+
+      if (token && storedUser) {
+        setUser(JSON.parse(storedUser));
+        await fetchUser();
+      }
+
+      setLoading(false);
     };
 
-    // Initialize Auth State from Token
-    useEffect(() => {
-        const checkAuth = async () => {
-            const token = localStorage.getItem("token");
-            const storedUser = localStorage.getItem("user");
+    initAuth();
+  }, []);
 
-            if (token) {
-                if (storedUser) setUser(JSON.parse(storedUser));
-                await fetchUser(); // Always refresh to get latest savedRecipes
-            }
-            setLoading(false);
-        };
-        checkAuth();
-    }, []);
+  // LOGIN
+  const login = async (email, password) => {
+    try {
+      const response = await api.post("/auth/login", {
+        email: email.toLowerCase().trim(),
+        password,
+      });
 
-    const login = async (email, password) => {
-        try {
-            const response = await axios.post("http://localhost:5000/api/auth/login", { email, password });
-            const { user, token } = response.data;
+      const { user, token } = response.data;
 
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(user));
-            setUser(user);
-            return { success: true };
-        } catch (error) {
-            console.error("Login failed", error);
-            return {
-                success: false,
-                message: error.response?.data?.message || "Login failed"
-            };
-        }
-    };
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
 
-    const register = async (userData) => {
-        try {
-            const response = await axios.post("http://localhost:5000/api/auth/register", userData);
-            return { success: true };
-        } catch (error) {
-            console.error("Registration failed", error);
-            return {
-                success: false,
-                message: error.response?.data?.message || error.response?.data?.errors?.username?.[0] || "Registration failed"
-            };
-        }
-    };
+      return { success: true };
+    } catch (error) {
+      console.error("Login failed", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Invalid email or password",
+      };
+    }
+  };
 
-    const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
-    };
+  // REGISTER
+  const register = async (userData) => {
+    try {
+      await api.post("/auth/register", {
+        ...userData,
+        email: userData.email.toLowerCase().trim(),
+      });
 
-    return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading, fetchUser }}>
-            {!loading && children}
-        </AuthContext.Provider>
-    );
+      return { success: true };
+    } catch (error) {
+      console.error("Registration failed", error);
+
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          error.response?.data?.errors?.username?.[0] ||
+          error.response?.data?.errors?.email?.[0] ||
+          "Registration failed",
+      };
+    }
+  };
+
+  // LOGOUT
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        loading,
+        fetchUser,
+      }}
+    >
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 };

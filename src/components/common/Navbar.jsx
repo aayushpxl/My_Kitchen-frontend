@@ -9,7 +9,6 @@ const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    // Add scroll effect for a premium feel
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
@@ -68,21 +67,20 @@ const Navbar = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 relative group ${isActive(link.path)
+                            className={`px-4 py-2 rounded-xl text-[20px] font-semibold transition-all duration-300 relative group ${isActive(link.path)
                                 ? 'text-orange-600'
                                 : 'text-gray-500 hover:text-gray-900'
                                 }`}
+
                         >
                             {link.name}
-                            {/* Animated Underline */}
                             <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-1 bg-orange-500 rounded-full transition-all duration-300 ${isActive(link.path) ? 'w-4' : 'w-0 group-hover:w-4'}`}></span>
                         </Link>
-                    ))}
+                    ))} 
                 </div>
 
                 {/* Right Side: Search & User Profile */}
                 <div className="hidden md:flex items-center gap-6">
-                    {/* Minimalist Search Bar */}
                     <div className="relative group">
                         <input
                             type="text"
@@ -96,28 +94,29 @@ const Navbar = () => {
                         </div>
                     </div>
 
-                    {/* User Profile Glass Card */}
+                    {/* User Profile - Clickable to /profile */}
                     <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-                        <div className="group relative">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-400 to-red-500 p-[2px] shadow-md transition-transform group-hover:rotate-6">
-                                <div className="w-full h-full rounded-[14px] bg-white overflow-hidden p-0.5">
-                                    <img
-                                        src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff&bold=true`}
-                                        alt="User"
-                                        className="w-full h-full rounded-[12px] object-cover"
-                                    />
+                        <Link to="/profile" className="flex items-center gap-3 group/profile">
+                            <div className="group relative">
+                                <div className={`w-10 h-10 rounded-2xl p-[2px] shadow-md transition-all duration-300 group-hover/profile:rotate-6 ${isActive('/profile') ? 'bg-orange-500 rotate-6' : 'bg-gradient-to-tr from-orange-400 to-red-500'}`}>
+                                    <div className="w-full h-full rounded-[14px] bg-white overflow-hidden p-0.5">
+                                        <img
+                                            src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff&bold=true`}
+                                            alt="User"
+                                            className="w-full h-full rounded-[12px] object-cover"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm font-bold text-gray-800 leading-none">{user?.username || 'Guest'}</span>
-                            <button
-                                onClick={logout}
-                                className="text-[11px] font-bold text-gray-400 hover:text-red-500 text-left transition-colors uppercase tracking-wider mt-1"
-                            >
-                                Logout
-                            </button>
-                        </div>
+                            <div className="flex flex-col">
+                                <span className={`text-sm font-bold leading-none transition-colors ${isActive('/profile') ? 'text-orange-600' : 'text-gray-800 group-hover/profile:text-orange-500'}`}>
+                                    {user?.username || 'Guest'}
+                                </span>
+                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">View Profile</span>
+                            </div>
+                        </Link>
+                        
+                        
                     </div>
                 </div>
 
@@ -134,9 +133,17 @@ const Navbar = () => {
                 </button>
             </div>
 
-            {/* Mobile Menu Dropdown with Glass Effect */}
+            {/* Mobile Menu Dropdown */}
             <div className={`absolute top-full left-0 w-full transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'} md:hidden`}>
                 <div className="mx-6 my-4 p-6 bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl border border-white/50 flex flex-col gap-2">
+                    {/* Add Profile to Mobile Menu */}
+                    <Link
+                        to="/profile"
+                        className={`text-lg font-bold px-4 py-3 rounded-2xl transition-all ${isActive('/profile') ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-gray-700 hover:bg-gray-50'}`}
+                        onClick={() => setIsMenuOpen(false)}
+                    >
+                        My Profile
+                    </Link>
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
@@ -148,15 +155,15 @@ const Navbar = () => {
                         </Link>
                     ))}
                     <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3">
                              <img
                                 src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff`}
                                 alt="User"
                                 className="w-10 h-10 rounded-xl"
                             />
                             <span className="font-bold text-gray-800">{user?.username}</span>
-                        </div>
-                        <Button onClick={logout} className="rounded-xl px-6 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-none shadow-none">Logout</Button>
+                        </Link>
+                        {/* <Button onClick={logout} className="rounded-xl px-6 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-none shadow-none text-sm">Logout</Button> */}
                     </div>
                 </div>
             </div>
