@@ -13,6 +13,7 @@ import Recipes from "../pages/Recipes";
 import Challenges from "../pages/Challenges";
 import Profile from "../pages/Profile";
 import ChallengeDetails from "../pages/challenges/ChallengeDetails";
+import MealPlanner from "../pages/MealPlanner";
 
 const AppRouter = () => {
   return (
@@ -28,6 +29,9 @@ const AppRouter = () => {
 
         {/* challange route */}
         <Route path="/challenges/:id" element={<ChallengeDetails />} />
+
+        
+        <Route path="/meal-planning" element={<MealPlanner />} />
 
         
         
