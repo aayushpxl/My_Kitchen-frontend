@@ -23,8 +23,7 @@ export const useRecipes = () => {
     return useQuery({
         queryKey: ["recipes"],
         queryFn: async () => {
-            const { data } = await getAllRecipes();
-            return data;
+            return await getAllRecipes();
         },
     });
 };
@@ -33,8 +32,7 @@ export const useRecipe = (id) => {
     return useQuery({
         queryKey: ["recipe", id],
         queryFn: async () => {
-            const { data } = await getRecipeById(id);
-            return data;
+            return await getRecipeById(id);
         },
         enabled: !!id,
     });

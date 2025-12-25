@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
+import { Navigate } from "react-router-dom";
+import AdminLayout from "../components/layout/AdminLayout";
 
 import Home from "../pages/Home";
 import Welcome from "../pages/Welcome";
@@ -15,6 +17,10 @@ import Profile from "../pages/Profile";
 import ChallengeDetails from "../pages/challenges/ChallengeDetails";
 import MealPlanner from "../pages/MealPlanner";
 import AdminHome from "../pages/admin/AdminHome";
+import AdminRecipes from "../pages/admin/AdminRecipes";
+import AdminChallenges from "../pages/admin/AdminChallenges";
+import CreateChallenge from "../pages/admin/CreateChallenge";
+import AdminUsers from "../pages/admin/AdminUsers";
 
 const AppRouter = () => {
   return (
@@ -31,11 +37,11 @@ const AppRouter = () => {
         {/* challange route */}
         <Route path="/challenges/:id" element={<ChallengeDetails />} />
 
-        
+
         <Route path="/meal-planning" element={<MealPlanner />} />
 
-        
-        
+
+
 
         {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
@@ -50,10 +56,18 @@ const AppRouter = () => {
 
         {/* Admin Routes */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin/add-recipe" element={<AdminHome />} />
-          <Route path="/admin/home" element={<AdminHome />} />
-        
-        
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminHome />} />
+            <Route path="recipes" element={<AdminRecipes />} />
+            <Route path="add-recipe" element={<AddRecipe />} />
+            <Route path="challenges" element={<AdminChallenges />} />
+            <Route path="create-challenge" element={<CreateChallenge />} />
+            <Route path="edit-challenge/:id" element={<CreateChallenge />} />
+
+            <Route path="users" element={<AdminUsers />} />
+            {/* Future routes will be added here */}
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

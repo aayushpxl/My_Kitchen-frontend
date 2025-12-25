@@ -17,7 +17,11 @@ const Login = () => {
 
     const res = await login(formData.email, formData.password);
     if (res.success) {
-      navigate('/home');
+      if (res.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/home');
+      }
     } else {
       setError(res.message);
     }

@@ -26,12 +26,12 @@ const Navbar = () => {
 
     return (
         <nav className={`fixed top-0 left-0 w-full transition-all duration-300 z-[100] px-6 md:px-12 lg:px-24 py-4 
-            ${scrolled 
-                ? 'bg-white/80 backdrop-blur-md shadow-lg py-3' 
+            ${scrolled
+                ? 'bg-white/80 backdrop-blur-md shadow-lg py-3'
                 : 'bg-transparent py-5'}`}
         >
             <div className="max-w-7xl mx-auto flex items-center justify-between">
-                
+
                 {/* Logo Section */}
                 <Link to="/home" className="flex items-center gap-3 group">
                     <div className="relative w-11 h-11 transition-transform group-hover:scale-110 duration-300">
@@ -54,13 +54,13 @@ const Navbar = () => {
                 <div className="hidden md:flex items-center gap-1">
                     {user?.role === 'admin' && (
                         <Link
-                            to="/admin/add-recipe"
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${isActive('/admin/add-recipe')
+                            to="/admin/dashboard"
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${isActive('/admin/dashboard')
                                 ? 'bg-orange-50 text-orange-600'
                                 : 'text-gray-600 hover:text-orange-500 hover:bg-orange-50/50'
                                 }`}
                         >
-                            Add Recipe
+                            Admin Dashboard
                         </Link>
                     )}
                     {navLinks.map((link) => (
@@ -76,7 +76,7 @@ const Navbar = () => {
                             {link.name}
                             <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-1 bg-orange-500 rounded-full transition-all duration-300 ${isActive(link.path) ? 'w-4' : 'w-0 group-hover:w-4'}`}></span>
                         </Link>
-                    ))} 
+                    ))}
                 </div>
 
                 {/* Right Side: Search & User Profile */}
@@ -115,8 +115,8 @@ const Navbar = () => {
                                 <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">View Profile</span>
                             </div>
                         </Link>
-                        
-                        
+
+
                     </div>
                 </div>
 
@@ -156,7 +156,7 @@ const Navbar = () => {
                     ))}
                     <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
                         <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3">
-                             <img
+                            <img
                                 src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff`}
                                 alt="User"
                                 className="w-10 h-10 rounded-xl"
