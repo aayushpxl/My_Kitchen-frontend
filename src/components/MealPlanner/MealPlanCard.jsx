@@ -23,6 +23,6 @@ export default function MealPlanCard({ plan, onEdit, onDelete }) {
           🗑️
         </button>
       </div>
-    </div>
+    </div>  
   );
 }

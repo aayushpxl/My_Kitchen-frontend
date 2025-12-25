@@ -14,6 +14,7 @@ import Challenges from "../pages/Challenges";
 import Profile from "../pages/Profile";
 import ChallengeDetails from "../pages/challenges/ChallengeDetails";
 import MealPlanner from "../pages/MealPlanner";
+import AdminHome from "../pages/admin/AdminHome";
 
 const AppRouter = () => {
   return (
@@ -49,7 +50,10 @@ const AppRouter = () => {
 
         {/* Admin Routes */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin/add-recipe" element={<AddRecipe />} />
+          <Route path="/admin/add-recipe" element={<AdminHome />} />
+          <Route path="/admin/home" element={<AdminHome />} />
+        
+        
         </Route>
       </Routes>
     </BrowserRouter>

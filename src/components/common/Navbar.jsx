@@ -67,7 +67,7 @@ const Navbar = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className={`px-4 py-2 rounded-xl text-[20px] font-semibold transition-all duration-300 relative group ${isActive(link.path)
+                            className={`px-4 py-2 rounded-xl text-[18px] font-semibold transition-all duration-300 relative group ${isActive(link.path)
                                 ? 'text-orange-600'
                                 : 'text-gray-500 hover:text-gray-900'
                                 }`}
