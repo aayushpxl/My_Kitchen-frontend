@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { 
-  CheckCircle, XCircle, Eye, Clock, 
-  ShieldCheck, Inbox, ArrowRight, MessageSquare 
+import {
+    CheckCircle, XCircle, Eye, Clock,
+    ShieldCheck, Inbox, ArrowRight, MessageSquare, AlertCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const API_URL = 'http://localhost:5000/api/recipes';
 
@@ -86,11 +87,10 @@ const AdminModeration = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-                                activeTab === tab.id
+                            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id
                                     ? 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
                                     : 'text-gray-500 hover:text-gray-700'
-                            }`}
+                                }`}
                         >
                             {activeTab === tab.id ? tab.icon : null}
                             {tab.label}
@@ -121,7 +121,7 @@ const AdminModeration = () => {
                             {/* Recipe Image */}
                             <div className="w-full md:w-32 h-32 bg-gray-100 rounded-[1.5rem] overflow-hidden flex-shrink-0 relative">
                                 {recipe.image ? (
-                                    <img src={recipe.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    <img src={getImageUrl(recipe.image)} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-3xl">🥘</div>
                                 )}
@@ -138,7 +138,7 @@ const AdminModeration = () => {
                                 <p className="text-sm text-gray-500 line-clamp-2 mb-4 font-medium leading-relaxed">
                                     {recipe.description}
                                 </p>
-                                
+
                                 <div className="flex flex-wrap items-center gap-4">
                                     <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full text-[11px] font-bold text-gray-500 border border-gray-100">
                                         <div className="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center text-[10px] text-orange-600 font-black">

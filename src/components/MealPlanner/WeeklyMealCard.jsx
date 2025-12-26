@@ -1,5 +1,6 @@
 import React from 'react';
 import { Eye, Edit3, Trash2, Clock, Flame } from "lucide-react";
+import { getImageUrl } from "../../utils/imageUtils";
 
 export default function WeeklyMealCard({ meal, onDelete, onEdit, onView, isHeader = false }) {
   // 1. Header Variant
@@ -22,13 +23,13 @@ export default function WeeklyMealCard({ meal, onDelete, onEdit, onView, isHeade
 
   return (
     <div className="group relative min-w-[320px] max-w-[320px] bg-white border border-gray-100 rounded-[2rem] p-3 flex items-center gap-4 transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)] hover:border-orange-200/60 cursor-pointer">
-      
+
       {/* Image: Compact & Squircle */}
       <div className="relative shrink-0 w-20 h-20 overflow-hidden rounded-[1.5rem] bg-gray-50 shadow-inner">
-        <img 
-          src={recipe?.image || "https://placehold.co/400x400?text=Meal"} 
-          alt={recipe?.title} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+        <img
+          src={getImageUrl(recipe?.image, "https://placehold.co/400x400?text=Meal")}
+          alt={recipe?.title}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
       </div>
@@ -48,7 +49,7 @@ export default function WeeklyMealCard({ meal, onDelete, onEdit, onView, isHeade
         <h4 className="font-bold text-gray-900 text-[13px] leading-tight truncate mb-1 group-hover:text-orange-600 transition-colors">
           {recipe?.title}
         </h4>
-        
+
         {/* Nutrition Strip: Minimalist */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
@@ -66,19 +67,19 @@ export default function WeeklyMealCard({ meal, onDelete, onEdit, onView, isHeade
 
       {/* Hover Actions: Minimalist Floating Bar */}
       <div className="absolute inset-y-0 right-2 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
-        <button 
+        <button
           onClick={(e) => { e.stopPropagation(); onView(recipe?._id); }}
           className="w-8 h-8 flex items-center justify-center bg-white border border-gray-100 text-gray-400 hover:text-blue-500 hover:border-blue-100 rounded-full shadow-sm transition-all active:scale-90"
         >
           <Eye size={14} />
         </button>
-        <button 
+        <button
           onClick={(e) => { e.stopPropagation(); onEdit(meal); }}
           className="w-8 h-8 flex items-center justify-center bg-white border border-gray-100 text-gray-400 hover:text-emerald-500 hover:border-emerald-100 rounded-full shadow-sm transition-all active:scale-90"
         >
           <Edit3 size={14} />
         </button>
-        <button 
+        <button
           onClick={(e) => { e.stopPropagation(); onDelete(meal._id); }}
           className="w-8 h-8 flex items-center justify-center bg-white border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-90"
         >

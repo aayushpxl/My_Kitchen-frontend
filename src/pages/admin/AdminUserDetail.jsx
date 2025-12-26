@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  ChevronLeft, Mail, Calendar, Shield, 
-  Award, Zap, Utensils, Hash, CheckCircle, 
-  TrendingUp, Clock
+import {
+    ChevronLeft, Mail, Calendar, Shield,
+    Award, Zap, Utensils, Hash, CheckCircle,
+    TrendingUp, Clock, MapPin, Phone
 } from 'lucide-react';
 
 const AdminUserDetail = () => {
@@ -37,14 +37,14 @@ const AdminUserDetail = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
         </div>
     );
-    
+
     if (error) return <div className="p-8 text-center text-red-500 font-medium">{error}</div>;
 
     return (
         <div className="max-w-5xl mx-auto pb-12">
             {/* Header Navigation */}
-            <button 
-                onClick={() => navigate(-1)} 
+            <button
+                onClick={() => navigate(-1)}
                 className="group flex items-center gap-2 text-gray-400 hover:text-orange-600 transition-colors mb-6 font-semibold"
             >
                 <div className="p-2 bg-white rounded-xl shadow-sm group-hover:bg-orange-50 transition-colors">
@@ -66,22 +66,21 @@ const AdminUserDetail = () => {
                             {/* Avatar */}
                             <div className="w-32 h-32 rounded-[2rem] bg-white p-1.5 shadow-xl">
                                 <div className="w-full h-full rounded-[1.8rem] bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-4xl font-black text-orange-600 overflow-hidden uppercase">
-                                    {user.profilePicture ? (
-                                        <img src={user.profilePicture} alt={user.username} className="w-full h-full object-cover" />
+                                    {user.profilePic ? (
+                                        <img src={`http://localhost:5000${user.profilePic}`} alt={user.username} className="w-full h-full object-cover" />
                                     ) : (
                                         user.username.charAt(0)
                                     )}
                                 </div>
                             </div>
-                            
+
                             <div className="mb-2">
                                 <div className="flex items-center gap-3">
                                     <h1 className="text-3xl font-black text-gray-900 tracking-tight">{user.username}</h1>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border ${
-                                        user.role === 'admin' 
-                                        ? 'bg-purple-50 text-purple-600 border-purple-100' 
-                                        : 'bg-blue-50 text-blue-600 border-blue-100'
-                                    }`}>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border ${user.role === 'admin'
+                                            ? 'bg-purple-50 text-purple-600 border-purple-100'
+                                            : 'bg-blue-50 text-blue-600 border-blue-100'
+                                        }`}>
                                         {user.role}
                                     </span>
                                 </div>
@@ -95,6 +94,15 @@ const AdminUserDetail = () => {
                                         <Hash size={14} className="text-orange-500" />
                                         ID: {id.slice(-6)}
                                     </span>
+                                    {user.location && (
+                                        <>
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                            <span className="flex items-center gap-1.5 text-sm font-medium">
+                                                <MapPin size={14} className="text-orange-500" />
+                                                {user.location}
+                                            </span>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -133,6 +141,15 @@ const AdminUserDetail = () => {
                                 <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Email Address</label>
                                 <p className="text-gray-700 font-semibold truncate">{user.email}</p>
                             </div>
+                            {user.phoneNumber && (
+                                <div>
+                                    <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Phone Number</label>
+                                    <p className="text-gray-700 font-semibold flex items-center gap-2">
+                                        <Phone size={14} className="text-gray-400" />
+                                        {user.phoneNumber}
+                                    </p>
+                                </div>
+                            )}
                             <div>
                                 <label className="text-[10px] uppercase font-black text-gray-400 tracking-widest">Account Status</label>
                                 <div className="flex items-center gap-2 mt-1">
@@ -142,6 +159,18 @@ const AdminUserDetail = () => {
                             </div>
                         </div>
                     </div>
+
+                    {user.bio && (
+                        <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm mt-6">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Award size={18} className="text-orange-500" />
+                                About Chef
+                            </h3>
+                            <p className="text-gray-600 leading-relaxed italic text-sm">
+                                "{user.bio}"
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Col: Activity/Badges Preview */}
@@ -154,7 +183,7 @@ const AdminUserDetail = () => {
                             </h3>
                             <button className="text-xs font-bold text-orange-600 hover:underline">View All</button>
                         </div>
-                        
+
                         {/* Empty Activity State */}
                         <div className="flex flex-col items-center justify-center py-10 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                             <Clock size={32} className="text-gray-300 mb-2" />

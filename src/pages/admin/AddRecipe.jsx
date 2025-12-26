@@ -14,9 +14,11 @@ const AddRecipe = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        image: '',
+        image: '', // URL
         cookingTime: '',
         difficulty: 'Medium',
+        category: '',
+        servings: '',
         isPrivate: false,
         nutrition: {
             calories: '',
@@ -31,6 +33,10 @@ const AddRecipe = () => {
     ]);
 
     const [steps, setSteps] = useState(['']);
+    const [tags, setTags] = useState(['']);
+    const [proTips, setProTips] = useState(['']);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         if (isEditing) {
@@ -52,11 +58,20 @@ const AddRecipe = () => {
                 image: recipe.image,
                 cookingTime: recipe.cookingTime || '',
                 difficulty: recipe.difficulty || 'Medium',
+                category: recipe.category || '',
+                servings: recipe.servings || '',
                 isPrivate: recipe.status === 'private',
                 nutrition: recipe.nutrition || { calories: '', protein: '', carbs: '', fat: '' }
             });
             setIngredients(recipe.ingredients || []);
             setSteps(recipe.steps || []);
+            setTags(recipe.tags || ['']);
+            setProTips(recipe.proTips || ['']);
+            if (recipe.image && !recipe.image.startsWith('http')) {
+                setImagePreview(`http://localhost:5000${recipe.image}`);
+            } else if (recipe.image) {
+                setImagePreview(recipe.image);
+            }
         } catch (err) {
             console.error(err);
             setError("Failed to load recipe for editing");
@@ -110,6 +125,36 @@ const AddRecipe = () => {
         }
     };
 
+    // Array Field Handlers (Tags, Pro Tips)
+    const handleArrayChange = (setter, index, value) => {
+        setter(prev => {
+            const next = [...prev];
+            next[index] = value;
+            return next;
+        });
+    };
+
+    const addArrayField = (setter) => {
+        setter(prev => [...prev, '']);
+    };
+
+    const removeArrayField = (setter, index, min = 1) => {
+        setter(prev => {
+            if (prev.length > min) {
+                return prev.filter((_, i) => i !== index);
+            }
+            return prev;
+        });
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -126,12 +171,30 @@ const AddRecipe = () => {
                 throw new Error("All steps must have content");
             }
 
-            const payload = {
-                ...formData,
-                status: formData.isPrivate ? 'private' : 'pending', // Reset to pending if edited and public
-                ingredients: ingredients,
-                steps: steps.filter(s => s.trim())
-            };
+            const data = new FormData();
+
+            // Basic fields
+            data.append('title', formData.title);
+            data.append('description', formData.description);
+            data.append('cookingTime', formData.cookingTime);
+            data.append('difficulty', formData.difficulty);
+            data.append('category', formData.category);
+            data.append('servings', formData.servings);
+            data.append('status', formData.isPrivate ? 'private' : 'pending');
+
+            // Image (File or URL)
+            if (imageFile) {
+                data.append('image', imageFile);
+            } else {
+                data.append('image', formData.image);
+            }
+
+            // Complex fields (Stringified for Multer)
+            data.append('ingredients', JSON.stringify(ingredients.filter(i => i.name.trim())));
+            data.append('steps', JSON.stringify(steps.filter(s => s.trim())));
+            data.append('tags', JSON.stringify(tags.filter(t => t.trim())));
+            data.append('proTips', JSON.stringify(proTips.filter(p => p.trim())));
+            data.append('nutrition', JSON.stringify(formData.nutrition));
 
             const url = isEditing
                 ? `http://localhost:5000/api/recipes/${id}`
@@ -139,9 +202,12 @@ const AddRecipe = () => {
 
             const method = isEditing ? 'put' : 'post';
 
-            await axios[method](url, payload, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            };
+
+            await axios[method](url, data, { headers });
 
             // Redirect based on intent and source
             if (window.location.pathname.includes('admin')) {
@@ -193,16 +259,54 @@ const AddRecipe = () => {
                             />
                         </div>
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                            <input
-                                type="url"
-                                name="image"
-                                // required // Optional in schema but good to have
-                                value={formData.image}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                                placeholder="https://example.com/image.jpg"
-                            />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Recipe Image</label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-4">
+                                    <div className="relative group cursor-pointer border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-500 hover:bg-red-50 transition-all text-center">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                        />
+                                        <div className="text-gray-400 group-hover:text-red-500">
+                                            <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span className="text-xs font-medium uppercase tracking-wider">Browse Image</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                        <span className="text-[10px] text-gray-400 font-bold uppercase">OR</span>
+                                        <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                    </div>
+                                    <input
+                                        type="url"
+                                        name="image"
+                                        value={formData.image}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm"
+                                        placeholder="Paste image URL here..."
+                                    />
+                                </div>
+                                <div className="aspect-video bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center relative shadow-inner">
+                                    {imagePreview ? (
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-gray-300 text-sm font-medium italic">No preview available</span>
+                                    )}
+                                    {imagePreview && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setImageFile(null); setImagePreview(null); setFormData(p => ({ ...p, image: '' })) }}
+                                            className="absolute top-2 right-2 bg-white/80 backdrop-blur-md p-1.5 rounded-full text-gray-500 hover:text-red-500 shadow-sm"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -241,6 +345,30 @@ const AddRecipe = () => {
                                 <option value="Medium">Medium</option>
                                 <option value="Hard">Hard</option>
                             </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <input
+                                type="text"
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none"
+                                placeholder="e.g. Breakfast, Dessert"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Servings</label>
+                            <input
+                                type="number"
+                                name="servings"
+                                value={formData.servings}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none"
+                                placeholder="e.g. 4"
+                            />
                         </div>
                     </div>
 
@@ -353,6 +481,80 @@ const AddRecipe = () => {
                                         <button
                                             type="button"
                                             onClick={() => removeStep(index)}
+                                            className="p-2 text-gray-400 hover:text-red-500"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Tags Section */}
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="text-lg font-medium text-gray-900">Tags</h3>
+                            <button
+                                type="button"
+                                onClick={() => addArrayField(setTags)}
+                                className="text-sm text-red-600 hover:text-red-700 font-medium"
+                            >
+                                + Add Tag
+                            </button>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            {tags.map((tag, index) => (
+                                <div key={index} className="flex-1 min-w-[150px] relative">
+                                    <input
+                                        type="text"
+                                        value={tag}
+                                        onChange={(e) => handleArrayChange(setTags, index, e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-red-500 outline-none pr-8"
+                                        placeholder="e.g. Vegan"
+                                    />
+                                    {tags.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeArrayField(setTags, index)}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Pro Tips Section */}
+                    <div>
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="text-lg font-medium text-gray-900">Pro Tips</h3>
+                            <button
+                                type="button"
+                                onClick={() => addArrayField(setProTips)}
+                                className="text-sm text-red-600 hover:text-red-700 font-medium"
+                            >
+                                + Add Pro Tip
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {proTips.map((tip, index) => (
+                                <div key={index} className="flex gap-3 items-center">
+                                    <div className="flex-1">
+                                        <input
+                                            type="text"
+                                            value={tip}
+                                            onChange={(e) => handleArrayChange(setProTips, index, e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-red-500 outline-none"
+                                            placeholder="A useful tip for best results..."
+                                        />
+                                    </div>
+                                    {proTips.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => removeArrayField(setProTips, index)}
                                             className="p-2 text-gray-400 hover:text-red-500"
                                         >
                                             ✕

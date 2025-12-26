@@ -6,6 +6,7 @@ import Navbar from '../../components/common/Navbar';  // ✅ Home navbar
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
 import CookingMode from '../../components/recipes/CookingMode';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const RecipeDetail = () => {
     const { id } = useParams();
@@ -44,7 +45,7 @@ const RecipeDetail = () => {
 
             {/* Hero Image */}
             <div className="relative h-[400px] w-full">
-                <img src={recipe.image || "https://placehold.co/1200x600"} alt={recipe.title} className="w-full h-full object-cover" />
+                <img src={getImageUrl(recipe.image, "https://placehold.co/1200x600")} alt={recipe.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-10 left-4 md:left-20 text-white w-full pr-8 flex justify-between items-end">
                     <div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Search } from "lucide-react";
 import api from "../../api/api"; // Your axios instance
+import { getImageUrl } from "../../utils/imageUtils";
 
 export default function RecipeSearchModal({ isOpen, onClose, onSelect }) {
   const [recipes, setRecipes] = useState([]);
@@ -25,7 +26,7 @@ export default function RecipeSearchModal({ isOpen, onClose, onSelect }) {
     }
   };
 
-  const filteredRecipes = recipes.filter(r => 
+  const filteredRecipes = recipes.filter(r =>
     r.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -61,12 +62,12 @@ export default function RecipeSearchModal({ isOpen, onClose, onSelect }) {
           {loading ? (
             <p className="text-center text-gray-500">Loading recipes...</p>
           ) : filteredRecipes.map((recipe) => (
-            <div 
+            <div
               key={recipe._id}
               onClick={() => onSelect(recipe._id)}
               className="flex items-center gap-4 p-3 border border-gray-100 rounded-2xl hover:border-[#00B488] hover:bg-[#00B488]/5 cursor-pointer transition-all group"
             >
-              <img src={recipe.image} className="w-16 h-16 rounded-lg object-cover" alt="" />
+              <img src={getImageUrl(recipe.image)} className="w-16 h-16 rounded-lg object-cover" alt="" />
               <div className="flex-1">
                 <h4 className="font-bold text-gray-900 group-hover:text-[#00B488]">{recipe.title}</h4>
                 <p className="text-xs text-gray-400">{recipe.category} • {recipe.cookingTime} mins</p>

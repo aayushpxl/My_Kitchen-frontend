@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { Bookmark } from 'lucide-react';
 import { useUserProfile } from '../hooks/useAuthHooks';
 import { useAuth } from '../context/AuthContext';
 import Interests from '../components/Profile/Interests';
 import MyRecipesList from '../components/Profile/MyRecipesList';
+import SavedRecipesList from '../components/Profile/SavedRecipesList';
 import Navbar from '../components/common/Navbar';
 import LogoutModal from '../components/ui/LogoutModal';
 import { updateProfile } from '../api/authApi';
@@ -254,6 +256,14 @@ const Profile = () => {
                   >
                     {isUpdating ? 'Saving...' : 'Save Changes'}
                   </button>
+                </div>
+
+                <div className="mt-10 border-t border-gray-100 pt-10">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Bookmark className="text-orange-500" size={20} />
+                    <h3 className="text-lg font-semibold text-gray-900">Saved Recipes</h3>
+                  </div>
+                  <SavedRecipesList />
                 </div>
 
                 <div className="mt-10 border-t border-gray-100 pt-10">

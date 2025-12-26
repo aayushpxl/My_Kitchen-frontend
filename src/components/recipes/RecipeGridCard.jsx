@@ -1,18 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Bookmark, Heart } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { toggleSaveRecipe } from '../../api/recipeApi';
+import { toast } from 'react-toastify';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const RecipeGridCard = ({ recipe }) => {
+    const { user, fetchUser } = useAuth();
+    const [isSaving, setIsSaving] = useState(false);
+
+    const isSaved = user?.savedRecipes?.includes(recipe._id);
+
+    const handleToggleSave = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user) {
+            toast.info("Please login to save recipes!");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const res = await toggleSaveRecipe(recipe._id);
+            if (res.success) {
+                toast.success(res.message);
+                await fetchUser(); // Refresh user state to update isSaved
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to save recipe");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div className="group relative bg-white rounded-[2.5rem] p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 flex flex-col h-full overflow-hidden">
-            
+
             {/* Image Section - Scaled down slightly with a more refined shape */}
             <div className="relative aspect-square mb-5 overflow-hidden rounded-[2rem]">
                 <img
-                    src={recipe.image || "https://placehold.co/400x400?text=No+Image"}
+                    src={getImageUrl(recipe.image)}
                     alt={recipe.title}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                 />
-                
+
+                {/* Floating Save Button */}
+                <button
+                    onClick={handleToggleSave}
+                    disabled={isSaving}
+                    className={`absolute top-3 left-3 z-10 p-2.5 rounded-2xl transition-all duration-300 ${isSaved
+                        ? 'bg-orange-600 text-white shadow-lg shadow-orange-200 scale-110'
+                        : 'bg-white/80 backdrop-blur-md text-gray-900 border border-white/50 hover:bg-white hover:scale-110'
+                        }`}
+                >
+                    <Bookmark
+                        size={16}
+                        className={`${isSaved ? 'fill-current' : ''} ${isSaving ? 'animate-pulse' : ''}`}
+                    />
+                </button>
+
                 {/* Floating Nutrition Badge - Premium Minimalist */}
                 {recipe.nutrition?.calories && (
                     <div className="absolute top-3 right-3 backdrop-blur-md bg-white/80 px-3 py-1.5 rounded-2xl shadow-sm border border-white/50">
@@ -21,11 +69,11 @@ const RecipeGridCard = ({ recipe }) => {
                         </span>
                     </div>
                 )}
-                
+
                 {/* Gradient Overlay for better text legibility if needed */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
-            
+
             {/* Content Section - Improved Typography Hierarchy */}
             <div className="flex flex-col flex-grow px-2">
                 <div className="flex items-center gap-2 mb-2">

@@ -3,6 +3,7 @@ import { getMyRecipes } from '../../api/recipeApi';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Clock, CheckCircle, XCircle, Lock, Edit2, ChevronRight, Eye } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const MyRecipesList = () => {
     const [recipes, setRecipes] = useState([]);
@@ -72,7 +73,7 @@ const MyRecipesList = () => {
                 <div key={recipe._id} className="group bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
                     <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                         {recipe.image ? (
-                            <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
+                            <img src={getImageUrl(recipe.image)} alt={recipe.title} className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300">🍰</div>
                         )}

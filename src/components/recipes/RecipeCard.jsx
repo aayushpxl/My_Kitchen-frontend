@@ -1,17 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const RecipeCard = ({ recipe }) => {
   const { calories, protein, carbs, fat } = recipe.nutrition || {};
 
   return (
     <div className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition p-5 border border-gray-100 flex flex-col h-full hover:-translate-y-1">
-      
+
       {/* Image */}
       <div className="relative mb-5 h-52 rounded-2xl overflow-hidden">
         <img
-          src={recipe.image || "https://placehold.co/600x400?text=No+Image"}
+          src={getImageUrl(recipe.image)}
           alt={recipe.title}
           className="w-full h-full object-cover transform hover:scale-105 transition duration-500"
         />

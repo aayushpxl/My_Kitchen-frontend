@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Clock, Users, Flame, ChevronLeft, CheckCircle, XCircle } from 'lucide-react';
 import Button from '../../components/ui/Button';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const AdminRecipeDetail = ({ source = 'recipes' }) => {
     const { id } = useParams();
@@ -74,7 +75,7 @@ const AdminRecipeDetail = ({ source = 'recipes' }) => {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="h-64 w-full bg-gray-100 relative">
                     {recipe.image ? (
-                        <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(recipe.image)} alt={recipe.title} className="w-full h-full object-cover" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-4xl">🍰</div>
                     )}

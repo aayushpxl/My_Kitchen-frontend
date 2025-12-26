@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllRecipes, deleteRecipe } from '../../api/recipeApi';
 import { Pencil, Trash2, Plus, Eye, Search, Filter, Calendar, User, ChefHat } from 'lucide-react';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const AdminRecipes = () => {
     const [recipes, setRecipes] = useState([]);
@@ -93,19 +94,19 @@ const AdminRecipes = () => {
                 </div>
 
                 <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl">
-                    <button 
+                    <button
                         onClick={() => setFilterRole('all')}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterRole === 'all' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         All
                     </button>
-                    <button 
+                    <button
                         onClick={() => setFilterRole('admin')}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterRole === 'admin' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         Admin
                     </button>
-                    <button 
+                    <button
                         onClick={() => setFilterRole('user')}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterRole === 'user' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
@@ -139,7 +140,7 @@ const AdminRecipes = () => {
                                         <div className="flex items-center gap-4">
                                             <div className="w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden shadow-inner flex-shrink-0 group-hover:scale-105 transition-transform">
                                                 {recipe.image ? (
-                                                    <img src={recipe.image} alt="" className="w-full h-full object-cover" />
+                                                    <img src={getImageUrl(recipe.image)} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full bg-orange-100 flex items-center justify-center text-orange-500 font-bold">
                                                         {recipe.title.charAt(0)}
@@ -153,11 +154,10 @@ const AdminRecipes = () => {
                                         </div>
                                     </td>
                                     <td className="px-8 py-5">
-                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
-                                            recipe.createdByRole === 'admin' 
-                                            ? 'bg-purple-50 text-purple-600 ring-1 ring-inset ring-purple-200' 
-                                            : 'bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200'
-                                        }`}>
+                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${recipe.createdByRole === 'admin'
+                                                ? 'bg-purple-50 text-purple-600 ring-1 ring-inset ring-purple-200'
+                                                : 'bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200'
+                                            }`}>
                                             <User size={12} />
                                             {recipe.createdBy?.username || 'Unknown'}
                                             {recipe.createdByRole === 'admin' && <span className="opacity-60 font-medium tracking-tighter ml-0.5">STAFF</span>}
@@ -176,8 +176,8 @@ const AdminRecipes = () => {
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Link 
-                                                to={`/admin/recipe/${recipe._id}`} 
+                                            <Link
+                                                to={`/admin/recipe/${recipe._id}`}
                                                 className="p-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
                                                 title="View Details"
                                             >

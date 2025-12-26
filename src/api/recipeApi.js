@@ -22,14 +22,20 @@ export const getRecipeById = async (id) => {
 
 export const createRecipe = async (recipeData) => {
     const response = await axios.post(API_URL, recipeData, {
-        headers: getAuthHeader()
+        headers: {
+            ...getAuthHeader(),
+            'Content-Type': recipeData instanceof FormData ? 'multipart/form-data' : 'application/json'
+        }
     });
     return response.data;
 };
 
 export const updateRecipe = async (id, recipeData) => {
     const response = await axios.put(`${API_URL}/${id}`, recipeData, {
-        headers: getAuthHeader()
+        headers: {
+            ...getAuthHeader(),
+            'Content-Type': recipeData instanceof FormData ? 'multipart/form-data' : 'application/json'
+        }
     });
     return response.data;
 };
@@ -50,6 +56,13 @@ export const toggleSaveRecipe = async (id) => {
 
 export const getMyRecipes = async () => {
     const response = await axios.get(`${API_URL}/my-recipes`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const getSavedRecipes = async () => {
+    const response = await axios.get(`${API_URL}/saved/all`, {
         headers: getAuthHeader()
     });
     return response.data;

@@ -4,6 +4,7 @@ import axios from 'axios';
 import Navbar from '../components/common/Navbar';
 import { BookOpen, MapPin, Calendar, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getImageUrl } from '../utils/imageUtils';
 
 const PublicProfile = () => {
     const { id } = useParams();
@@ -51,9 +52,9 @@ const PublicProfile = () => {
 
             <div className="bg-white border-b border-gray-200">
                 <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col md:flex-row items-center gap-8">
-                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                    <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-orange-100">
                         <img
-                            src={`https://ui-avatars.com/api/?name=${profile.username}&background=orange&color=fff&size=200`}
+                            src={profile.profilePic ? `http://localhost:5000${profile.profilePic}` : `https://ui-avatars.com/api/?name=${profile.username}&background=orange&color=fff&size=200`}
                             alt={profile.username}
                             className="w-full h-full object-cover"
                         />
@@ -61,10 +62,17 @@ const PublicProfile = () => {
                     <div className="text-center md:text-left">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">{profile.username}</h1>
                         <div className="flex flex-wrap justify-center md:justify-start gap-4 text-gray-500 text-sm">
-                            <span className="flex items-center gap-1"><User size={16} /> Chef</span>
-                            <span className="flex items-center gap-1"><MapPin size={16} /> Kitchen Explorer</span>
+                            <span className="flex items-center gap-1"><User size={16} /> {profile.role === 'admin' ? 'Master Chef' : 'Home Chef'}</span>
+                            {profile.location && (
+                                <span className="flex items-center gap-1"><MapPin size={16} /> {profile.location}</span>
+                            )}
                             <span className="flex items-center gap-1"><Calendar size={16} /> Joined {new Date(profile.createdAt).getFullYear()}</span>
                         </div>
+                        {profile.bio && (
+                            <p className="mt-4 text-gray-600 max-w-xl italic">
+                                "{profile.bio}"
+                            </p>
+                        )}
                     </div>
                     <div className="ml-auto flex gap-4">
                         <div className="text-center px-6 py-2 bg-orange-50 rounded-xl border border-orange-100">
@@ -93,7 +101,7 @@ const PublicProfile = () => {
                             <Link key={recipe._id} to={`/recipes/${recipe._id}`} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
                                 <div className="h-48 overflow-hidden relative">
                                     <img
-                                        src={recipe.image || "https://placehold.co/600x400"}
+                                        src={getImageUrl(recipe.image)}
                                         alt={recipe.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
