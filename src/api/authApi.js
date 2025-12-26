@@ -7,3 +7,10 @@ export const loginUser = (data) =>
   api.post("/auth/login", data);
 
 export const getMe = () => api.get("/auth/me");
+
+export const updateProfile = (formData) =>
+  api.put("/auth/profile", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });

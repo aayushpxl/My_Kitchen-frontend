@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUserProfile } from '../hooks/useAuthHooks';
@@ -7,6 +7,8 @@ import Interests from '../components/Profile/Interests';
 import MyRecipesList from '../components/Profile/MyRecipesList';
 import Navbar from '../components/common/Navbar';
 import LogoutModal from '../components/ui/LogoutModal';
+import { updateProfile } from '../api/authApi';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const { data: user, isLoading, isError } = useUserProfile();
@@ -16,6 +18,78 @@ const Profile = () => {
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Profile fields state
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    phoneNumber: '',
+    bio: '',
+    location: ''
+  });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        bio: user.bio || '',
+        location: user.location || ''
+      });
+      setPreviewUrl(user.profilePic ? `http://localhost:5000${user.profilePic}` : null);
+    }
+  }, [user]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File is too large! Maximum size allowed is 10MB.");
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    setIsUpdating(true);
+    try {
+      const data = new FormData();
+      Object.keys(formData).forEach(key => {
+        data.append(key, formData[key]);
+      });
+      if (selectedFile) {
+        if (selectedFile.size > 10 * 1024 * 1024) {
+          toast.error("File is too large! Maximum size allowed is 10MB.");
+          setIsUpdating(false);
+          return;
+        }
+        data.append('profilePic', selectedFile);
+      }
+
+      const response = await updateProfile(data);
+      if (response.data.success) {
+        toast.success("Profile updated successfully! ✨");
+        queryClient.invalidateQueries(['userProfile']);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -49,15 +123,30 @@ const Profile = () => {
           {/* LEFT SIDEBAR */}
           <aside className="lg:w-72 space-y-6">
             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm text-center">
-              <img
-                src={`https://ui-avatars.com/api/?name=${user.username}&background=E5F0FF&color=1D4ED8&size=128`}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-                alt="avatar"
-              />
+              <div className="relative w-24 h-24 mx-auto mb-4 group">
+                <img
+                  src={previewUrl || `https://ui-avatars.com/api/?name=${user.username}&background=E5F0FF&color=1D4ED8&size=128`}
+                  className="w-full h-full rounded-full object-cover border-2 border-orange-100"
+                  alt="avatar"
+                />
+                <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                  <p className="text-[10px] text-white font-medium">Change Photo</p>
+                </div>
+              </div>
               <h2 className="font-semibold text-gray-900">{user.username}</h2>
               <p className="text-sm text-gray-400">@{user.username}</p>
 
-              <button className="mt-4 w-full text-sm font-medium text-gray-600 bg-gray-100 py-2 rounded-lg hover:bg-gray-200">
+              <input
+                type="file"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-4 w-full text-sm font-medium text-gray-600 bg-gray-100 py-2 rounded-lg hover:bg-gray-200"
+              >
                 Change Photo
               </button>
             </div>
@@ -101,35 +190,69 @@ const Profile = () => {
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input label="Full Name" value={user.username} />
-                  <Input label="Username" value={user.username} />
-                  <Input label="Email Address" value={user.email} />
-                  <Input label="Phone Number" placeholder="+1 (555) 123-4567" />
+                  <Input
+                    label="Username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                  />
+                  <Input
+                    label="Email Address"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                  />
+                  <Input
+                    label="Phone Number"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    placeholder="+1 (555) 123-4567"
+                    onChange={handleInputChange}
+                  />
+                  <Input
+                    label="Location"
+                    name="location"
+                    value={formData.location}
+                    placeholder="Nepal"
+                    onChange={handleInputChange}
+                  />
 
                   <div className="md:col-span-2">
                     <Label>Short Bio</Label>
                     <textarea
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
                       rows="3"
                       className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
                       placeholder="Food lover sharing simple recipes 🍳"
                     />
                   </div>
-
-                  <div className="md:col-span-2">
-                    <Label>Location</Label>
-                    <input
-                      className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
-                      placeholder="Nepal"
-                    />
-                  </div>
                 </div>
 
                 <div className="mt-8 flex justify-end gap-4">
-                  <button className="text-sm text-gray-500 hover:text-gray-800">
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        username: user.username || '',
+                        email: user.email || '',
+                        phoneNumber: user.phoneNumber || '',
+                        bio: user.bio || '',
+                        location: user.location || ''
+                      });
+                      setPreviewUrl(user.profilePic ? `http://localhost:5000${user.profilePic}` : null);
+                      setSelectedFile(null);
+                    }}
+                    className="text-sm text-gray-500 hover:text-gray-800"
+                  >
                     Cancel
                   </button>
-                  <button className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800">
-                    Save Changes
+                  <button
+                    onClick={handleSaveChanges}
+                    disabled={isUpdating}
+                    className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+                  >
+                    {isUpdating ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
 
@@ -165,6 +288,7 @@ const Profile = () => {
         }}
       />
     </div>
+
   );
 };
 
@@ -174,11 +298,13 @@ const Label = ({ children }) => (
   </label>
 );
 
-const Input = ({ label, value, placeholder }) => (
+const Input = ({ label, value, placeholder, name, onChange }) => (
   <div>
     <Label>{label}</Label>
     <input
-      defaultValue={value}
+      name={name}
+      value={value}
+      onChange={onChange}
       placeholder={placeholder}
       className="w-full p-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
     />

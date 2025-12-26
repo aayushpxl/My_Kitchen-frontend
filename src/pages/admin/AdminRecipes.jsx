@@ -1,29 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllRecipes, deleteRecipe } from '../../api/recipeApi';
-import { Pencil, Trash2, Plus, Eye, Search } from 'lucide-react';
+import { Pencil, Trash2, Plus, Eye, Search, Filter, Calendar, User, ChefHat } from 'lucide-react';
 
 const AdminRecipes = () => {
     const [recipes, setRecipes] = useState([]);
     const [filteredRecipes, setFilteredRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterRole, setFilterRole] = useState('all');
 
     useEffect(() => {
         fetchRecipes();
     }, []);
 
     useEffect(() => {
-        if (!searchTerm) {
-            setFilteredRecipes(recipes);
-        } else {
+        let result = recipes;
+        if (filterRole !== 'all') {
+            result = result.filter(r => {
+                if (filterRole === 'admin') return r.createdByRole === 'admin';
+                if (filterRole === 'user') return r.createdByRole !== 'admin';
+                return true;
+            });
+        }
+        if (searchTerm) {
             const lower = searchTerm.toLowerCase();
-            setFilteredRecipes(recipes.filter(r =>
+            result = result.filter(r =>
                 r.title.toLowerCase().includes(lower) ||
                 r.createdBy?.username?.toLowerCase().includes(lower)
-            ));
+            );
         }
-    }, [searchTerm, recipes]);
+        setFilteredRecipes(result);
+    }, [searchTerm, recipes, filterRole]);
 
     const fetchRecipes = async () => {
         try {
@@ -42,96 +50,160 @@ const AdminRecipes = () => {
         try {
             await deleteRecipe(id);
             setRecipes(recipes.filter(r => r._id !== id));
-            // Toast success here
         } catch (error) {
             console.error("Failed to delete recipe", error);
             alert("Failed to delete recipe");
         }
     };
 
-    if (loading) return <div className="text-center p-10">Loading recipes...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        </div>
+    );
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Recipes Management</h2>
-                <Link to="/admin/add-recipe" className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition">
-                    <Plus size={18} />
+        <div className="max-w-7xl mx-auto pb-10">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                <div>
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Recipe Vault</h1>
+                    <p className="text-gray-500 mt-1 flex items-center gap-2">
+                        <ChefHat size={16} className="text-orange-500" />
+                        Manage and curate the MyKitchen recipe collection
+                    </p>
+                </div>
+                <Link to="/admin/add-recipe" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:-translate-y-0.5 transition-all active:scale-95">
+                    <Plus size={20} />
                     Add New Recipe
                 </Link>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {/* Filters / Search */}
-                <div className="p-4 border-b border-gray-100 bg-gray-50 flex items-center gap-4">
-                    <div className="relative flex-1 max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search recipes..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
-                    </div>
-                    <div className="text-sm text-gray-500">
-                        Total: {filteredRecipes.length}
-                    </div>
+            {/* Toolbar Section */}
+            <div className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm mb-6 flex flex-wrap items-center gap-4">
+                <div className="relative flex-1 min-w-[300px]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Search by title or author..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-orange-500/20 transition-all text-gray-700 placeholder:text-gray-400"
+                    />
                 </div>
 
+                <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl">
+                    <button 
+                        onClick={() => setFilterRole('all')}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterRole === 'all' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        All
+                    </button>
+                    <button 
+                        onClick={() => setFilterRole('admin')}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterRole === 'admin' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        Admin
+                    </button>
+                    <button 
+                        onClick={() => setFilterRole('user')}
+                        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${filterRole === 'user' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        Community
+                    </button>
+                </div>
+
+                <div className="hidden lg:block h-8 w-px bg-gray-100 mx-2"></div>
+
+                <div className="text-sm font-medium text-gray-400">
+                    Showing <span className="text-gray-900">{filteredRecipes.length}</span> recipes
+                </div>
+            </div>
+
+            {/* Table/List Container */}
+            <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-gray-50 text-gray-600 text-xs uppercase font-semibold">
-                            <tr>
-                                <th className="px-6 py-4">Recipe</th>
-                                <th className="px-6 py-4">Created By</th>
-                                <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4 text-center">Actions</th>
+                        <thead>
+                            <tr className="border-b border-gray-50">
+                                <th className="px-8 py-5 text-sm font-bold text-gray-400 uppercase tracking-wider">Recipe Info</th>
+                                <th className="px-8 py-5 text-sm font-bold text-gray-400 uppercase tracking-wider">Author</th>
+                                <th className="px-8 py-5 text-sm font-bold text-gray-400 uppercase tracking-wider">Published</th>
+                                <th className="px-8 py-5 text-sm font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-50">
                             {filteredRecipes.map((recipe) => (
-                                <tr key={recipe._id} className="hover:bg-gray-50/50 transition">
-                                    <td className="px-6 py-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden">
+                                <tr key={recipe._id} className="group hover:bg-orange-50/30 transition-colors">
+                                    <td className="px-8 py-5">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden shadow-inner flex-shrink-0 group-hover:scale-105 transition-transform">
                                                 {recipe.image ? (
                                                     <img src={recipe.image} alt="" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full bg-orange-100 flex items-center justify-center text-orange-400">R</div>
+                                                    <div className="w-full h-full bg-orange-100 flex items-center justify-center text-orange-500 font-bold">
+                                                        {recipe.title.charAt(0)}
+                                                    </div>
                                                 )}
                                             </div>
-                                            <div>
-                                                <div className="font-medium text-gray-900">{recipe.title}</div>
-                                                <div className="text-xs text-gray-500 truncate max-w-[200px]">{recipe.description}</div>
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-gray-900 truncate">{recipe.title}</div>
+                                                <div className="text-sm text-gray-400 truncate max-w-[250px]">{recipe.description}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-3">
-                                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${recipe.createdByRole === 'admin' ? 'bg-purple-50 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>
+                                    <td className="px-8 py-5">
+                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
+                                            recipe.createdByRole === 'admin' 
+                                            ? 'bg-purple-50 text-purple-600 ring-1 ring-inset ring-purple-200' 
+                                            : 'bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200'
+                                        }`}>
+                                            <User size={12} />
                                             {recipe.createdBy?.username || 'Unknown'}
-                                        </span>
+                                            {recipe.createdByRole === 'admin' && <span className="opacity-60 font-medium tracking-tighter ml-0.5">STAFF</span>}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-3 text-sm text-gray-500">
-                                        {new Date(recipe.createdAt).toLocaleDateString()}
+                                    <td className="px-8 py-5">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-semibold text-gray-700">
+                                                {new Date(recipe.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </span>
+                                            <span className="text-xs text-gray-400 flex items-center gap-1">
+                                                <Calendar size={10} />
+                                                Created
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-3">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <Link to={`/admin/recipe/${recipe._id}`} className="p-1 text-gray-400 hover:text-blue-600">
-                                                <Eye size={18} />
+                                    <td className="px-8 py-5">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Link 
+                                                to={`/admin/recipe/${recipe._id}`} 
+                                                className="p-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                                                title="View Details"
+                                            >
+                                                <Eye size={20} />
                                             </Link>
-                                            {/* Note: Edit will just go to AddRecipe with state or separate Edit page. 
-                                                For now we can reuse AddRecipe if we refactor it, or just show alert 'Coming soon'
-                                                or link to /admin/edit-recipe/:id and implement that.
-                                            */}
-                                            <button className="p-1 text-gray-400 hover:text-green-600" title="Edit (Coming Soon)">
-                                                <Pencil size={18} />
-                                            </button>
+
+                                            {recipe.createdByRole === 'admin' ? (
+                                                <Link
+                                                    to={`/admin/recipes/edit-recipe/${recipe._id}`}
+                                                    className="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all"
+                                                    title="Edit Recipe"
+                                                >
+                                                    <Pencil size={20} />
+                                                </Link>
+                                            ) : (
+                                                <div className="p-2.5 text-gray-200 cursor-not-allowed" title="User Content">
+                                                    <Pencil size={20} />
+                                                </div>
+                                            )}
+
                                             <button
                                                 onClick={() => handleDelete(recipe._id)}
-                                                className="p-1 text-gray-400 hover:text-red-600"
+                                                className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                                title="Delete Recipe"
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={20} />
                                             </button>
                                         </div>
                                     </td>
@@ -139,8 +211,13 @@ const AdminRecipes = () => {
                             ))}
                             {filteredRecipes.length === 0 && (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
-                                        No recipes found.
+                                    <td colSpan="4" className="px-8 py-20 text-center">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                                <Search size={24} className="text-gray-300" />
+                                            </div>
+                                            <p className="text-gray-400 font-medium">No recipes match your criteria.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}

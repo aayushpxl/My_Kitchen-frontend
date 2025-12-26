@@ -68,6 +68,7 @@ const AppRouter = () => {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="recipes" element={<AdminRecipes />} />
+            <Route path="recipes/edit-recipe/:id" element={<AddRecipe />} />
             <Route path="recipe/:id" element={<AdminRecipeDetail source="recipes" />} />
             <Route path="moderation" element={<AdminModeration />} />
             <Route path="moderation/:id" element={<AdminRecipeDetail source="moderation" />} />
