@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import adminService from '../../services/adminService';
 import { Search, Mail, Trophy, Star, Shield } from 'lucide-react';
 
@@ -77,7 +78,7 @@ const AdminUsers = () => {
                                                 {user.username.charAt(0).toUpperCase()}
                                             </div>
                                             <div>
-                                                <div className="font-medium text-gray-900">{user.username}</div>
+                                                <Link to={`/admin/users/${user._id}`} className="font-medium text-gray-900 hover:text-orange-600 hover:underline">{user.username}</Link>
                                                 <div className="text-xs text-gray-500 flex items-center gap-1">
                                                     <Mail size={10} /> {user.email}
                                                 </div>

@@ -8,13 +8,13 @@ import { toast } from 'react-toastify';
 import CookingMode from '../../components/recipes/CookingMode';
 
 const RecipeDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { data: recipe, isLoading, error } = useRecipe(id);
-  const toggleSaveMutation = useToggleSaveRecipe();
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { data: recipe, isLoading, error } = useRecipe(id);
+    const toggleSaveMutation = useToggleSaveRecipe();
 
-  // ...rest of the component
+    // ...rest of the component
 
 
     const isSaved = user?.savedRecipes?.some(r => r === id || r._id === id); // Handle ID or object population
@@ -50,6 +50,11 @@ const RecipeDetail = () => {
                     <div>
                         <h1 className="text-4xl md:text-6xl font-bold mb-4">{recipe.title}</h1>
                         <div className="flex items-center gap-6 text-sm font-semibold">
+                            {recipe.createdBy && (
+                                <Link to={`/users/${recipe.createdBy._id}`} className="flex items-center gap-1 bg-white/20 backdrop-blur px-3 py-1 rounded-full hover:bg-white/30 transition">
+                                    👤 By {recipe.createdBy.username || "Unknown"}
+                                </Link>
+                            )}
                             {recipe.nutrition?.calories && (
                                 <span className="flex items-center gap-1">🔥 {recipe.nutrition.calories} Kcal</span>
                             )}
@@ -142,7 +147,7 @@ const RecipeDetail = () => {
                 </div>
             </div>
 
-            
+
         </div>
     );
 };

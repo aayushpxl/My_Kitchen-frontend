@@ -47,3 +47,10 @@ export const toggleSaveRecipe = async (id) => {
     });
     return response.data;
 };
+
+export const getMyRecipes = async () => {
+    const response = await axios.get(`${API_URL}/my-recipes`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};

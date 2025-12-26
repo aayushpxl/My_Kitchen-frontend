@@ -16,6 +16,7 @@ const AdminLayout = () => {
     const sidebarItems = [
         { name: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={20} /> },
         { name: 'Recipes', path: '/admin/recipes', icon: <UtensilsCrossed size={20} /> },
+        { name: 'Moderation', path: '/admin/moderation', icon: <Settings size={20} /> }, // Using Settings icon for now or check if Shield exists
         { name: 'Challenges', path: '/admin/challenges', icon: <Trophy size={20} /> },
         { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
     ];
@@ -36,8 +37,8 @@ const AdminLayout = () => {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    ? 'bg-orange-50 text-orange-600'
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                     }`}
                             >
                                 <span className="mr-3">{item.icon}</span>

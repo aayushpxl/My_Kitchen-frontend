@@ -117,7 +117,7 @@ const AdminRecipes = () => {
                                     </td>
                                     <td className="px-6 py-3">
                                         <div className="flex items-center justify-center gap-2">
-                                            <Link to={`/recipes/${recipe._id}`} target="_blank" className="p-1 text-gray-400 hover:text-blue-600">
+                                            <Link to={`/admin/recipe/${recipe._id}`} className="p-1 text-gray-400 hover:text-blue-600">
                                                 <Eye size={18} />
                                             </Link>
                                             {/* Note: Edit will just go to AddRecipe with state or separate Edit page. 

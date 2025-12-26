@@ -21,6 +21,10 @@ import AdminRecipes from "../pages/admin/AdminRecipes";
 import AdminChallenges from "../pages/admin/AdminChallenges";
 import CreateChallenge from "../pages/admin/CreateChallenge";
 import AdminUsers from "../pages/admin/AdminUsers";
+import AdminModeration from "../pages/admin/AdminModeration";
+import AdminRecipeDetail from "../pages/admin/AdminRecipeDetail";
+import PublicProfile from "../pages/PublicProfile";
+import AdminUserDetail from "../pages/admin/AdminUserDetail";
 
 const AppRouter = () => {
   return (
@@ -32,6 +36,7 @@ const AppRouter = () => {
         <Route path="/recipes/:id" element={<RecipeDetail />} />
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/users/:id" element={<PublicProfile />} />
 
 
         {/* challange route */}
@@ -51,7 +56,10 @@ const AppRouter = () => {
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Home />} /> {/* Alias for backward compatibility if needed */}
+          <Route path="/dashboard" element={<Home />} />
+          {/* Moved Add/Edit Recipe to Profile sub-routes for better organization, as requested */}
+          <Route path="/profile/create-recipe" element={<AddRecipe />} />
+          <Route path="/profile/edit-recipe/:id" element={<AddRecipe />} />
         </Route>
 
         {/* Admin Routes */}
@@ -60,13 +68,16 @@ const AppRouter = () => {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminHome />} />
             <Route path="recipes" element={<AdminRecipes />} />
+            <Route path="recipe/:id" element={<AdminRecipeDetail source="recipes" />} />
+            <Route path="moderation" element={<AdminModeration />} />
+            <Route path="moderation/:id" element={<AdminRecipeDetail source="moderation" />} />
             <Route path="add-recipe" element={<AddRecipe />} />
             <Route path="challenges" element={<AdminChallenges />} />
             <Route path="create-challenge" element={<CreateChallenge />} />
             <Route path="edit-challenge/:id" element={<CreateChallenge />} />
 
             <Route path="users" element={<AdminUsers />} />
-            {/* Future routes will be added here */}
+            <Route path="users/:id" element={<AdminUserDetail />} />
           </Route>
         </Route>
       </Routes>

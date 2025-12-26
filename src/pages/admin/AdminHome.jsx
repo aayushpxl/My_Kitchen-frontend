@@ -62,6 +62,12 @@ export default function AdminHome() {
             icon={<Activity className="text-green-600" size={24} />}
             color="bg-green-50"
           />
+          <StatsCard
+            title="Pending Recipes"
+            value={stats.pendingRecipes}
+            icon={<Activity className="text-red-600" size={24} />} // Using Activity for now, maybe AlertCircle better
+            color="bg-red-50"
+          />
         </div>
       )}
 

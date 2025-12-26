@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Button from '../../components/ui/Button';
 
 const AddRecipe = () => {
     const navigate = useNavigate();
+    const { id } = useParams(); // Get ID if editing
+    const isEditing = !!id;
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -12,6 +15,9 @@ const AddRecipe = () => {
         title: '',
         description: '',
         image: '',
+        cookingTime: '',
+        difficulty: 'Medium',
+        isPrivate: false,
         nutrition: {
             calories: '',
             protein: '',
@@ -25,6 +31,37 @@ const AddRecipe = () => {
     ]);
 
     const [steps, setSteps] = useState(['']);
+
+    useEffect(() => {
+        if (isEditing) {
+            fetchRecipe();
+        }
+    }, [id]);
+
+    const fetchRecipe = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`http://localhost:5000/api/recipes/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const recipe = res.data;
+
+            setFormData({
+                title: recipe.title,
+                description: recipe.description,
+                image: recipe.image,
+                cookingTime: recipe.cookingTime || '',
+                difficulty: recipe.difficulty || 'Medium',
+                isPrivate: recipe.status === 'private',
+                nutrition: recipe.nutrition || { calories: '', protein: '', carbs: '', fat: '' }
+            });
+            setIngredients(recipe.ingredients || []);
+            setSteps(recipe.steps || []);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load recipe for editing");
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -91,18 +128,26 @@ const AddRecipe = () => {
 
             const payload = {
                 ...formData,
+                status: formData.isPrivate ? 'private' : 'pending', // Reset to pending if edited and public
                 ingredients: ingredients,
                 steps: steps.filter(s => s.trim())
             };
 
-            await axios.post('http://localhost:5000/api/recipes', payload, {
+            const url = isEditing
+                ? `http://localhost:5000/api/recipes/${id}`
+                : 'http://localhost:5000/api/recipes';
+
+            const method = isEditing ? 'put' : 'post';
+
+            await axios[method](url, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            navigate('/home');
+            // Redirect based on intent
+            navigate('/profile');
         } catch (err) {
             console.error(err);
-            setError(err.response?.data?.message || err.message || 'Failed to create recipe');
+            setError(err.response?.data?.message || err.message || 'Failed to save recipe');
             // Check if validation errors exist
             if (err.response?.data?.errors) {
                 const validationErrors = err.response.data.errors.fieldErrors;
@@ -118,7 +163,7 @@ const AddRecipe = () => {
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm p-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Add New Recipe</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">{isEditing ? 'Edit Recipe' : 'Add New Recipe'}</h1>
                     <p className="text-gray-500 mt-2">Share your culinary masterpiece with the world.</p>
                 </div>
 
@@ -166,6 +211,32 @@ const AddRecipe = () => {
                                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
                                 placeholder="Tell us about your recipe..."
                             ></textarea>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Cooking Time</label>
+                            <input
+                                type="text"
+                                name="cookingTime"
+                                value={formData.cookingTime}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none"
+                                placeholder="e.g. 45 mins"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+                            <select
+                                name="difficulty"
+                                value={formData.difficulty}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 outline-none"
+                            >
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
                         </div>
                     </div>
 
@@ -295,7 +366,7 @@ const AddRecipe = () => {
                             disabled={loading}
                             className={`w-full py-3 text-lg font-bold shadow-md hover:shadow-lg transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            {loading ? 'Publishing Recipe...' : 'Publish Recipe'}
+                            {loading ? 'Saving...' : (isEditing ? 'Update Recipe' : 'Publish Recipe')}
                         </Button>
                     </div>
                 </form>
