@@ -24,30 +24,24 @@ const RecipeCard = ({ recipe }) => {
       </h3>
 
       {/* Nutrition Info */}
-      {recipe.nutrition && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {calories && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-orange-100 text-orange-700">
-              {calories} Kcal
-            </span>
-          )}
-          {protein && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
-              {protein}g Protein
-            </span>
-          )}
-          {carbs && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700">
-              {carbs}g Carbs
-            </span>
-          )}
-          {fat && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-pink-100 text-pink-700">
-              {fat}g Fat
-            </span>
-          )}
-        </div>
-      )}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {recipe.difficulty && (
+          <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${recipe.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : recipe.difficulty === 'Hard' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-amber-50 text-amber-600 border border-amber-100'
+            }`}>
+            {recipe.difficulty}
+          </span>
+        )}
+        {recipe.servings && (
+          <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-gray-50 text-gray-500 border border-gray-100 uppercase tracking-wider">
+            {recipe.servings} Servings
+          </span>
+        )}
+        {calories && (
+          <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-orange-50 text-orange-600 border border-orange-100 uppercase tracking-wider">
+            {calories} kcal
+          </span>
+        )}
+      </div>
 
       {/* Author + View Button */}
       <div className="mt-auto pt-3 border-t border-gray-100 flex justify-between items-center">

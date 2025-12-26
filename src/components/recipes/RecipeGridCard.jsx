@@ -76,14 +76,27 @@ const RecipeGridCard = ({ recipe }) => {
 
             {/* Content Section - Improved Typography Hierarchy */}
             <div className="flex flex-col flex-grow px-2">
-                <div className="flex items-center gap-2 mb-2">
-                    <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.15em]">
-                        {recipe.category || "Main Dish"}
-                    </span>
-                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {recipe.category && (
+                        <>
+                            <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.15em]">
+                                {recipe.category}
+                            </span>
+                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                        </>
+                    )}
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-                        {recipe.time || "25 min"}
+                        {recipe.cookingTime || "25 min"}
                     </span>
+                    {recipe.difficulty && (
+                        <>
+                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                            <span className={`text-[10px] font-bold uppercase tracking-[0.15em] ${recipe.difficulty === 'Easy' ? 'text-emerald-500' : recipe.difficulty === 'Hard' ? 'text-rose-500' : 'text-amber-500'
+                                }`}>
+                                {recipe.difficulty}
+                            </span>
+                        </>
+                    )}
                 </div>
 
                 <h3 className="text-lg font-black text-gray-900 mb-2 leading-tight group-hover:text-orange-600 transition-colors duration-300 line-clamp-1">
@@ -94,14 +107,29 @@ const RecipeGridCard = ({ recipe }) => {
                     {recipe.description || "A delicious recipe waiting for you to cook."}
                 </p>
 
-                {/* Ingredients tag list - More refined than raw text */}
-                <div className="flex flex-wrap gap-1.5 mb-6">
-                    {['Tomato', 'Cheese', 'Meat'].map((ing) => (
-                        <span key={ing} className="text-[9px] font-bold bg-gray-50 text-gray-400 px-2 py-1 rounded-md uppercase tracking-wide">
-                            {ing}
-                        </span>
-                    ))}
-                </div>
+                {/* Dynamic Tags list */}
+                {(recipe.tags && recipe.tags.length > 0) ? (
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                        {recipe.tags.slice(0, 3).map((tag) => (
+                            <span key={tag} className="text-[9px] font-bold bg-orange-50 text-orange-600/70 px-2 py-1 rounded-md uppercase tracking-wide border border-orange-100/50">
+                                {tag}
+                            </span>
+                        ))}
+                        {recipe.servings && (
+                            <span className="text-[9px] font-bold bg-gray-50 text-gray-400 px-2 py-1 rounded-md uppercase tracking-wide ml-auto">
+                                {recipe.servings} Servings
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex flex-wrap gap-1.5 mb-6">
+                        {recipe.servings && (
+                            <span className="text-[9px] font-bold bg-gray-50 text-gray-400 px-2 py-1 rounded-md uppercase tracking-wide">
+                                {recipe.servings} Servings
+                            </span>
+                        )}
+                    </div>
+                )}
 
                 {/* Action - Minimalist Button */}
                 <Link

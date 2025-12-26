@@ -40,7 +40,7 @@ const RecipeDetail = () => {
     if (error || !recipe) return <div className="min-h-screen flex items-center justify-center text-red-500">Recipe not found</div>;
 
     return (
-        <div className="min-h-screen bg-white font-sans">
+        <div className="min-h-screen bg-white font-sans overflow-x-hidden">
             <Navbar />
 
             {/* Hero Image */}
@@ -59,20 +59,36 @@ const RecipeDetail = () => {
                             {recipe.nutrition?.calories && (
                                 <span className="flex items-center gap-1">🔥 {recipe.nutrition.calories} Kcal</span>
                             )}
-                            {recipe.nutrition?.protein && (
-                                <span className="flex items-center gap-1">💪 {recipe.nutrition.protein} Protein</span>
+                            {recipe.difficulty && (
+                                <span className={`flex items-center gap-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur ${recipe.difficulty === 'Easy' ? 'text-emerald-400' : recipe.difficulty === 'Hard' ? 'text-rose-400' : 'text-amber-400'
+                                    }`}>
+                                    📊 {recipe.difficulty}
+                                </span>
+                            )}
+                            {recipe.servings && (
+                                <span className="flex items-center gap-1 bg-white/20 backdrop-blur px-3 py-1 rounded-full">
+                                    🍽️ {recipe.servings} Servings
+                                </span>
                             )}
                         </div>
                     </div>
                     {/* Save Button */}
                     <button
                         onClick={handleToggleSave}
-                        className="mr-12 md:mr-24 bg-white/20 backdrop-blur-md p-3 rounded-full hover:bg-white/30 transition shadow-lg group"
+                        className="mr-12 md:mr-24 bg-white/20 backdrop-blur-md p-3.5 rounded-full hover:bg-white/30 transition shadow-lg group border border-white/20"
                         title={isSaved ? "Unsave Recipe" : "Save Recipe"}
                     >
-                        <span className={`text-3xl ${isSaved ? "grayscale-0" : "grayscale"} `}>
-                            {isSaved ? "❤️" : "🤍"}
-                        </span>
+                        <svg
+                            className={`w-7 h-7 ${isSaved ? "fill-orange-400 text-orange-400" : "text-white"}`}
+                            viewBox="0 0 24 24"
+                            fill={isSaved ? "currentColor" : "none"}
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -82,8 +98,20 @@ const RecipeDetail = () => {
                 <div className="md:col-span-2 space-y-10">
                     <section>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Description</h2>
-                        <p className="text-gray-600 leading-relaxed">{recipe.description}</p>
+                        <p className="text-gray-600 leading-relaxed mb-6">{recipe.description}</p>
+
+                        {recipe.tags && recipe.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {recipe.tags.map(tag => (
+                                    <span key={tag} className="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-xs font-bold border border-orange-100 uppercase tracking-widest">
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </section>
+
+
 
                     <section>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Instructions</h2>
@@ -107,9 +135,30 @@ const RecipeDetail = () => {
                                 </div>
                             </div>
                         ) : (
-                            <CookingMode steps={recipe.steps} />
+                            <CookingMode recipe={recipe} />
                         )}
                     </section>
+
+                    {/* Pro Tips Section - Moved here and redesigned */}
+                    {recipe.proTips && recipe.proTips.length > 0 && (
+                        <div className="bg-[#F0F4FF] rounded-3xl p-6 md:p-8 flex items-start gap-4 md:gap-6 border border-blue-50/50">
+                            <div className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 bg-[#F59E0B] rounded-full flex items-center justify-center shadow-lg shadow-orange-100">
+                                <svg className="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-[#4F46E5] font-black text-sm uppercase tracking-widest mb-2">Chef's Pro Tip</h3>
+                                <div className="space-y-3">
+                                    {recipe.proTips.map((tip, idx) => (
+                                        <p key={idx} className="text-[#4F46E5] text-base md:text-lg font-medium leading-relaxed opacity-90">
+                                            {tip}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Sidebar: Ingredients */}
