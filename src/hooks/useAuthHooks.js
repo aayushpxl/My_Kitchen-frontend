@@ -20,8 +20,8 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      // Save token to localStorage
-      localStorage.setItem("token", data.data.token);
+      // Save token to sessionStorage
+      sessionStorage.setItem("token", data.data.token);
       // Update the user profile in cache immediately
       queryClient.setQueryData(["user-profile"], data.data.user);
       queryClient.invalidateQueries(["user-profile"]);

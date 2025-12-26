@@ -18,7 +18,7 @@ const AdminRecipeDetail = ({ source = 'recipes' }) => {
     useEffect(() => {
         const fetchRecipe = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 const res = await axios.get(`http://localhost:5000/api/recipes/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -37,7 +37,7 @@ const AdminRecipeDetail = ({ source = 'recipes' }) => {
     const handleApprove = async () => {
         if (!window.confirm("Approve this recipe?")) return;
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             await axios.put(`http://localhost:5000/api/recipes/${id}/status`, { status: 'approved' }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -51,7 +51,7 @@ const AdminRecipeDetail = ({ source = 'recipes' }) => {
         const reason = prompt("Enter rejection reason:");
         if (!reason) return;
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             await axios.put(`http://localhost:5000/api/recipes/${id}/status`, { status: 'rejected', rejectionReason: reason }, {
                 headers: { Authorization: `Bearer ${token}` }
             });

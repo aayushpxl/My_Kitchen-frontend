@@ -40,7 +40,7 @@ const AddRecipe = () => {
 
     const fetchRecipe = async () => {
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const res = await axios.get(`http://localhost:5000/api/recipes/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -116,7 +116,7 @@ const AddRecipe = () => {
         setError('');
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
 
             // Validate basic requirements
             if (ingredients.some(i => !i.name.trim())) {
@@ -143,8 +143,12 @@ const AddRecipe = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Redirect based on intent
-            navigate('/profile');
+            // Redirect based on intent and source
+            if (window.location.pathname.includes('admin')) {
+                navigate('/admin/recipes');
+            } else {
+                navigate('/profile');
+            }
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || err.message || 'Failed to save recipe');

@@ -8,7 +8,7 @@ export const useLoginUser = () => {
     mutationFn: loginUserService,
     onSuccess: (data) => {
       toast.success(data.message || "Login successful");
-      localStorage.setItem("token", data.token);
+      sessionStorage.setItem("token", data.token);
     },
     onError: (err) => {
       toast.error(err?.message || err?.msg || "Login failed");

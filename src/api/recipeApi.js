@@ -4,7 +4,7 @@ const API_URL = 'http://localhost:5000/api/recipes';
 
 // Helper for auth headers
 const getAuthHeader = () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

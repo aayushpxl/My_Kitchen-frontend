@@ -13,7 +13,7 @@ const AdminUserDetail = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 // Assuming we can fetch user by ID. If not, we might need a specific admin endpoint or search.
                 // Standard REST pattern is /users/:id
                 const res = await axios.get(`http://localhost:5000/api/users/${id}`, {

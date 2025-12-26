@@ -25,7 +25,7 @@ const AdminModeration = () => {
     const fetchRecipes = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             // Fetch based on active tab or all if possible. 
             // Currently assuming we can fetch all or just pending.
             // Requirement implies filtering capability.
@@ -63,7 +63,7 @@ const AdminModeration = () => {
     const handleApprove = async (id) => {
         if (!window.confirm("Approve this recipe for public view?")) return;
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             await axios.put(`${API_URL}/${id}/status`, { status: 'approved' }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -83,7 +83,7 @@ const AdminModeration = () => {
     const handleReject = async () => {
         if (!rejectionReason.trim()) return alert("Please provide a reason");
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             await axios.put(`${API_URL}/${selectedRecipe._id}/status`, {
                 status: 'rejected',
                 rejectionReason
@@ -114,8 +114,8 @@ const AdminModeration = () => {
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold text-gray-800">Moderation</h1>
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${activeTab === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                            activeTab === 'approved' ? 'bg-green-100 text-green-700' :
-                                'bg-red-100 text-red-700'
+                        activeTab === 'approved' ? 'bg-green-100 text-green-700' :
+                            'bg-red-100 text-red-700'
                         }`}>
                         {recipes.length} {activeTab}
                     </span>
@@ -127,8 +127,8 @@ const AdminModeration = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${activeTab === tab.id
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {tab.icon}

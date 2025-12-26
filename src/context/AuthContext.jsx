@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   // Attach token automatically
   api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data?.success) {
         setUser(response.data.user);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        sessionStorage.setItem("user", JSON.stringify(response.data.user));
       }
     } catch (error) {
       console.error("Failed to fetch user", error);
@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }) => {
   // Initialize auth on app load
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
+      const token = sessionStorage.getItem("token");
+      const storedUser = sessionStorage.getItem("user");
 
       if (token && storedUser) {
         setUser(JSON.parse(storedUser));
@@ -70,8 +70,8 @@ export const AuthProvider = ({ children }) => {
 
       const { user, token } = response.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("user", JSON.stringify(user));
       setUser(user);
 
       return { success: true, user };
@@ -109,8 +109,8 @@ export const AuthProvider = ({ children }) => {
 
   // LOGOUT
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     setUser(null);
   };
 
