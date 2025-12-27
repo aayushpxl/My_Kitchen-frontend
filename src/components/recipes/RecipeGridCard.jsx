@@ -12,6 +12,10 @@ const RecipeGridCard = ({ recipe }) => {
 
     const isSaved = user?.savedRecipes?.includes(recipe._id);
 
+    const averageRating = recipe.reviews?.length > 0
+        ? (recipe.reviews.reduce((acc, rev) => acc + rev.rating, 0) / recipe.reviews.length).toFixed(1)
+        : null;
+
     const handleToggleSave = async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -81,6 +85,14 @@ const RecipeGridCard = ({ recipe }) => {
                         <>
                             <span className="text-[10px] font-bold text-orange-500 uppercase tracking-[0.15em]">
                                 {recipe.category}
+                            </span>
+                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                        </>
+                    )}
+                    {averageRating && (
+                        <>
+                            <span className="flex items-center gap-1 text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">
+                                ⭐ {averageRating}
                             </span>
                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                         </>

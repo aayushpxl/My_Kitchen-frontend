@@ -67,3 +67,17 @@ export const getSavedRecipes = async () => {
     });
     return response.data;
 };
+
+export const addReview = async (id, reviewData) => {
+    const response = await axios.post(`${API_URL}/${id}/review`, reviewData, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const deleteReview = async (id, reviewId) => {
+    const response = await axios.delete(`${API_URL}/${id}/review/${reviewId}`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
