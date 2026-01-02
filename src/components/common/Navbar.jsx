@@ -1,13 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { Search, User, UtensilsCrossed, X } from 'lucide-react';
+import axios from 'axios';
 import Button from '../ui/Button';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+
+    // Search State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchType, setSearchType] = useState('recipes'); // 'recipes' or 'people'
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showResults, setShowResults] = useState(false);
+    const [searchDebounce, setSearchDebounce] = useState(null);
+
+    // Clear search on route change
+    useEffect(() => {
+        setSearchQuery('');
+        setSearchResults([]);
+        setShowResults(false);
+    }, [location.pathname]);
+
+    const performSearch = async (query, type) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        setIsSearching(true);
+        try {
+            let res;
+            if (type === 'people') {
+                res = await axios.get(`http://localhost:5000/api/users/search?query=${query}`);
+                setSearchResults(res.data);
+            } else {
+                // Assuming we might have a recipe search endpoint, or we can just mock for now if not ready
+                // For now, let's keep it empty or try to search recipes if that endpoint exists
+                res = await axios.get(`http://localhost:5000/api/recipes?search=${query}`); // Checking if this works
+                // Note: The controller mentions getAllRecipes takes query params, but might not implement text search yet. 
+                // We will test. If it returns all, we might filter client side if needed, or better, just show text "Search for..."
+                setSearchResults(res.data);
+            }
+        } catch (err) {
+            console.error("Search error:", err);
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        setShowResults(true);
+
+        if (searchDebounce) clearTimeout(searchDebounce);
+
+        const timeout = setTimeout(() => {
+            performSearch(query, searchType);
+        }, 300);
+        setSearchDebounce(timeout);
+    };
+
+    const handleTypeChange = (type) => {
+        setSearchType(type);
+        setSearchResults([]); // Clear previous results
+        if (searchQuery) {
+            performSearch(searchQuery, type);
+        }
+    };
+
+    const handleResultClick = (result) => {
+        if (searchType === 'people') {
+            navigate(`/users/${result._id}`);
+        } else {
+            navigate(`/recipes/${result._id}`);
+        }
+        setShowResults(false);
+        setSearchQuery('');
+    };
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -69,18 +146,97 @@ const Navbar = () => {
                 </div>
 
                 {/* Right Side: Search & User Profile */}
+                {/* Right Side: Search & User Profile */}
                 <div className="hidden md:flex items-center gap-6">
-                    <div className="relative group">
-                        <input
-                            type="text"
-                            placeholder="Find a recipe..."
-                            className="pl-10 pr-4 py-2.5 bg-gray-100/50 border border-transparent rounded-2xl text-sm text-gray-700 focus:bg-white focus:border-orange-200 focus:ring-4 focus:ring-orange-50 focus:outline-none transition-all w-40 focus:w-64"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg className="h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                    {/* Enhanced Search Bar */}
+                    <div className="relative group z-50">
+                        <div className={`flex items-center bg-gray-100/50 border border-transparent rounded-2xl transition-all focus-within:bg-white focus-within:border-orange-200 focus-within:ring-4 focus-within:ring-orange-50 focus-within:shadow-lg ${showResults && searchQuery ? 'rounded-b-none border-orange-200 bg-white ring-4 ring-orange-50' : ''}`}>
+
+                            {/* Search Type Selector */}
+                            <div className="flex border-r border-gray-200">
+                                <button
+                                    onClick={() => handleTypeChange('recipes')}
+                                    className={`p-2.5 rounded-l-2xl transition-colors ${searchType === 'recipes' ? 'text-orange-500 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+                                    title="Search Recipes"
+                                >
+                                    <UtensilsCrossed size={18} />
+                                </button>
+                                <button
+                                    onClick={() => handleTypeChange('people')}
+                                    className={`p-2.5 transition-colors ${searchType === 'people' ? 'text-orange-500 bg-orange-50' : 'text-gray-400 hover:text-gray-600'}`}
+                                    title="Search Chefs"
+                                >
+                                    <User size={18} />
+                                </button>
+                            </div>
+
+                            <div className="relative flex-1">
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    onFocus={() => setShowResults(true)}
+                                    // onBlur={() => setTimeout(() => setShowResults(false), 200)} // Delay to allow clicks
+                                    placeholder={searchType === 'people' ? "Find a chef..." : "Find a recipe..."}
+                                    className="w-48 pl-3 pr-10 py-2.5 bg-transparent border-none text-sm text-gray-700 focus:outline-none focus:ring-0 transition-all focus:w-64 placeholder-gray-400"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Search Results Dropdown */}
+                        {showResults && searchQuery && (
+                            <div className="absolute top-full left-0 w-full bg-white rounded-b-2xl border border-t-0 border-orange-200 shadow-xl max-h-80 overflow-y-auto overflow-x-hidden">
+                                {isSearching ? (
+                                    <div className="p-4 text-center text-gray-500 text-sm">Searching...</div>
+                                ) : searchResults.length > 0 ? (
+                                    <div className="py-2">
+                                        {searchResults.map((result) => (
+                                            <div
+                                                key={result._id}
+                                                onClick={() => handleResultClick(result)}
+                                                className="px-4 py-3 hover:bg-orange-50 cursor-pointer flex items-center gap-3 transition-colors border-b border-gray-50 last:border-none"
+                                            >
+                                                {searchType === 'people' ? (
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                                                        <img
+                                                            src={result.profilePic ? `http://localhost:5000${result.profilePic}` : `https://ui-avatars.com/api/?name=${result.username}&background=random`}
+                                                            alt={result.username}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-200 shrink-0">
+                                                        <img
+                                                            src={result.image ? `http://localhost:5000${result.image}` : "https://via.placeholder.com/50"}
+                                                            alt={result.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <span className="text-sm font-medium text-gray-800 truncate">
+                                                        {searchType === 'people' ? result.username : result.title}
+                                                    </span>
+                                                    {searchType === 'recipes' && (
+                                                        <span className="text-xs text-gray-400 truncate">{result.category || result.difficulty}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-4 text-center text-gray-500 text-sm">No results found</div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* User Profile - Clickable to /profile */}

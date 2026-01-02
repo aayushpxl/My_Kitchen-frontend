@@ -47,7 +47,7 @@ const PublicProfile = () => {
     if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 pt-20">
             <Navbar />
 
             <div className="bg-white border-b border-gray-200">
