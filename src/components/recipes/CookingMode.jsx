@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import { getImageUrl } from '../../utils/imageUtils';
+import { checkChallengeCompletion, getChallengeLockStatus } from '../../api/challengeApi';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const CookingMode = ({ recipe }) => {
+    const navigate = useNavigate();
     const [isStarted, setIsStarted] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
 
     const steps = recipe?.steps || [];
+
+    // CHALLENGE LOCK LOGIC
+    const [isLocked, setIsLocked] = useState(false);
+    const [lockInfo, setLockInfo] = useState(null);
+
+    useEffect(() => {
+        if (recipe?._id) {
+            getChallengeLockStatus(recipe._id).then(data => {
+                if (data.locked) {
+                    setIsLocked(true);
+                    setLockInfo(data);
+                }
+            }).catch(err => console.error("Lock check fail", err));
+        }
+    }, [recipe]);
 
     // If no steps, show message
     if (!steps || steps.length === 0) {
@@ -17,11 +36,19 @@ const CookingMode = ({ recipe }) => {
     const totalSteps = steps.length;
     const progress = ((currentStep + 1) / totalSteps) * 100;
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentStep < totalSteps - 1) {
             setCurrentStep(prev => prev + 1);
         } else {
             setIsCompleted(true);
+            try {
+                const result = await checkChallengeCompletion(recipe._id);
+                if (result.success) {
+                    toast.success(`Challenge Completed! +${result.earnedPoints} Points! 🏆`);
+                }
+            } catch (error) {
+                console.error("Failed to check challenge completion", error);
+            }
         }
     };
 
@@ -47,6 +74,27 @@ const CookingMode = ({ recipe }) => {
     };
 
     const activeContent = getStepContent(steps[currentStep]);
+
+    if (isLocked) {
+        return (
+            <div className="bg-gray-50 rounded-[2.5rem] p-12 text-center border border-gray-100 shadow-inner">
+                <div className="text-6xl mb-6">🔒</div>
+                <h3 className="text-3xl font-black text-gray-900 mb-4">Challenge Recipe!</h3>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                    This recipe is part of the <strong>"{lockInfo?.challengeTitle}"</strong> challenge.
+                    You must join the challenge to unlock the cooking mode and earn rewards!
+                </p>
+                <div className="flex justify-center gap-4">
+                    <Button
+                        onClick={() => navigate('/challenges')}
+                        className="bg-orange-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-700 transition-all"
+                    >
+                        Go to Challenges
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     if (!isStarted) {
         return (

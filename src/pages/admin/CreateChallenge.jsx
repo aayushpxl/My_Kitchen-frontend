@@ -15,6 +15,7 @@ const CreateChallenge = () => {
         title: '',
         description: '',
         recipe: '', // Recipe ID
+        difficulty: 'Medium',
         points: 50,
         scheduleType: 'weekly',
         startDate: '',
@@ -34,6 +35,7 @@ const CreateChallenge = () => {
                     title: challenge.title,
                     description: challenge.description,
                     recipe: challenge.recipe?._id || challenge.recipe,
+                    difficulty: challenge.difficulty || 'Medium',
                     points: challenge.points,
                     scheduleType: challenge.scheduleType,
                     startDate: challenge.startDate ? new Date(challenge.startDate).toISOString().split('T')[0] : '',
@@ -58,6 +60,7 @@ const CreateChallenge = () => {
             title: formData.title,
             description: formData.description,
             recipe: formData.recipe,
+            difficulty: formData.difficulty,
             points: Number(formData.points),
             scheduleType: formData.scheduleType,
             startDate: formData.startDate,
@@ -144,7 +147,20 @@ const CreateChallenge = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+                        <select
+                            name="difficulty"
+                            value={formData.difficulty}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        >
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Type</label>
                         <select

@@ -8,6 +8,7 @@ import Welcome from "../pages/Welcome";
 import Register from "../pages/Register";
 // import Dashboard from "../pages/Dashboard"; // Deprecated/Removed
 import ProtectedRoute from "./ProtectedRoute";
+import ChallengeList from "../pages/challenges/ChallengeList";
 import AdminRoute from "./AdminRoute";
 import RecipeDetail from "../pages/recipes/RecipeDetail";
 import AddRecipe from "../pages/admin/AddRecipe";
@@ -41,6 +42,7 @@ const AppRouter = () => {
 
         {/* challange route */}
         <Route path="/challenges/:id" element={<ChallengeDetails />} />
+        <Route path="/challenges/recipe/:id" element={<RecipeDetail />} />
 
 
         <Route path="/meal-planning" element={<MealPlanner />} />
@@ -72,7 +74,7 @@ const AppRouter = () => {
             <Route path="recipe/:id" element={<AdminRecipeDetail source="recipes" />} />
             <Route path="moderation" element={<AdminModeration />} />
             <Route path="moderation/:id" element={<AdminRecipeDetail source="moderation" />} />
-            <Route path="add-recipe" element={<AddRecipe />} />
+            <Route path="add-recipe" element={<AddRecipe />} /> {/* Existing add-recipe route */}
             <Route path="challenges" element={<AdminChallenges />} />
             <Route path="create-challenge" element={<CreateChallenge />} />
             <Route path="edit-challenge/:id" element={<CreateChallenge />} />

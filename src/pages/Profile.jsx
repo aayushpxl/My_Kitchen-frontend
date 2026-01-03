@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { getMyChallenges } from '../api/challengeApi';
 import { Bookmark } from 'lucide-react';
 import { useUserProfile } from '../hooks/useAuthHooks';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +12,96 @@ import Navbar from '../components/common/Navbar';
 import LogoutModal from '../components/ui/LogoutModal';
 import { updateProfile } from '../api/authApi';
 import { toast } from 'react-toastify';
+
+const ActiveChallengesList = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { data: myChallenges, isLoading } = useQuery({
+    queryKey: ['myChallenges'],
+    queryFn: getMyChallenges
+  });
+
+  const handleUnjoin = async (challengeId, e) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to unjoin this challenge?")) return;
+
+    try {
+      // Retrieve unjoinChallenge from api (will ensure import exists)
+      const { unjoinChallenge } = await import('../api/challengeApi');
+      await unjoinChallenge(challengeId);
+      toast.success("Left the challenge.");
+      queryClient.invalidateQueries(['myChallenges']);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to leave challenge");
+    }
+  };
+
+  if (isLoading) return <div className="text-center py-4 text-gray-400">Loading challenges...</div>;
+
+  if (!myChallenges || myChallenges.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500 mb-4">You haven't joined any challenges yet.</p>
+        <button
+          onClick={() => navigate('/challenges')}
+          className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 font-medium"
+        >
+          Browse Challenges
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {myChallenges.map((item) => {
+        const isCompleted = item.status === 'completed';
+        const recipeId = item.challenge?.recipe?._id || item.challenge?.recipe;
+        // The challenge object is populated, so ._id should work.
+        // However, if population fails or structure is inconsistent, fallbacks are needed.
+        const challengeId = item.challenge?._id || (typeof item.challenge === 'string' ? item.challenge : null);
+
+        // Debug check (temporary, or just robust code)
+        if (!challengeId) console.warn("Challenge ID missing for item:", item);
+
+        return (
+          <div key={item._id} className="border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow bg-gray-50 flex flex-col relative group">
+            <button
+              onClick={(e) => handleUnjoin(item._id, e)}
+              className="absolute top-2 right-2 bg-white p-1.5 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 shadow-sm opacity-0 group-hover:opacity-100 transition-all z-10"
+              title="Unjoin Challenge"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+            </button>
+
+            <div className="flex justify-between items-start mb-2 pr-6">
+              <h4 className="font-bold text-gray-800 line-clamp-1">{item.challenge?.title || 'Unknown Challenge'}</h4>
+              <span className={`text-xs px-2 py-1 rounded-full font-bold ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                {isCompleted ? 'Completed' : 'Active'}
+              </span>
+            </div>
+            <div className="mt-2 mb-4">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className={`h-2 rounded-full ${isCompleted ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: isCompleted ? '100%' : '10%' }}></div>
+              </div>
+              <div className="flex justify-between mt-1 text-xs text-gray-500">
+                <span>Progress</span>
+                <span>{isCompleted ? '100%' : '0%'}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate(recipeId ? `/challenges/recipe/${recipeId}` : '/challenges')}
+              className="mt-auto w-full py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              {isCompleted ? 'View Recipe' : 'Continue Cooking 🍳'}
+            </button>
+          </div>
+        )
+      })}
+    </div>
+  );
+};
 
 const Profile = () => {
   const { data: user, isLoading, isError } = useUserProfile();
@@ -169,6 +260,13 @@ const Profile = () => {
               >
                 🍳 My Recipes
               </button>
+              <button
+                onClick={() => setActiveTab('challenges')}
+                className={`w-full text-left px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'challenges' ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                🏆 My Challenges
+              </button>
             </nav>
 
             {/* LOGOUT BUTTON */}
@@ -272,6 +370,8 @@ const Profile = () => {
               </div>
             )}
 
+
+
             {activeTab === 'recipes' && (
               <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
                 <div className="flex justify-between items-center mb-6">
@@ -283,11 +383,55 @@ const Profile = () => {
                 <MyRecipesList />
               </div>
             )}
+
+            {activeTab === 'challenges' && (
+              <div className="space-y-6">
+                {/* Achievements Section */}
+                <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <span>🏆</span> Achievements
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-orange-50 p-4 rounded-xl text-center border border-orange-100">
+                      <div className="text-3xl font-bold text-orange-600 mb-1">{user.points || 0}</div>
+                      <div className="text-xs text-gray-500 uppercase font-bold tracking-wider">Points</div>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-xl text-center border border-blue-100">
+                      <div className="text-3xl font-bold text-blue-600 mb-1">{user.badges?.length || 0}</div>
+                      <div className="text-xs text-gray-500 uppercase font-bold tracking-wider">Badges</div>
+                    </div>
+                  </div>
+
+                  {user.badges?.length > 0 && (
+                    <div className="mt-8">
+                      <h4 className="text-sm font-semibold text-gray-800 mb-3">Your Badges</h4>
+                      <div className="flex flex-wrap gap-4">
+                        {user.badges.map((badge, idx) => (
+                          <div key={idx} className="flex flex-col items-center bg-gray-50 p-3 rounded-lg border border-gray-200 w-24">
+                            <span className="text-2xl mb-1">{badge.icon}</span>
+                            <span className="text-xs text-center font-medium leading-tight">{badge.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Active Challenges Section */}
+                <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <span>🔥</span> Active Challenges
+                  </h3>
+                  <p className="text-sm text-gray-400 mb-6">Check progress on your ongoing challenges.</p>
+
+                  <ActiveChallengesList />
+                </div>
+              </div>
+            )}
           </section>
         </div>
       </main>
 
-      {/* LOGOUT MODAL */}
       <LogoutModal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}

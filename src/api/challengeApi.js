@@ -41,7 +41,7 @@ export const completeChallenge = async (id) => {
 
 // Admin
 export const getAllChallengesAdmin = async () => {
-    const response = await axios.get(`${API_URL}/admin`, {
+    const response = await axios.get(`${API_URL}/admin/all`, {
         headers: getAuthHeader()
     });
     return response.data;
@@ -63,6 +63,39 @@ export const updateChallenge = async (id, data) => {
 
 export const deleteChallenge = async (id) => {
     const response = await axios.delete(`${API_URL}/${id}`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const unjoinChallenge = async (id) => {
+    const response = await axios.delete(`${API_URL}/${id}/unjoin`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const getLeaderboard = async () => {
+    const response = await axios.get(`${API_URL}/leaderboard`);
+    return response.data;
+};
+
+export const checkChallengeCompletion = async (recipeId) => {
+    const response = await axios.post(`${API_URL}/complete-by-recipe`, { recipeId }, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const getChallengeParticipants = async (challengeId) => {
+    const response = await axios.get(`${API_URL}/${challengeId}/participants`, {
+        headers: getAuthHeader()
+    });
+    return response.data;
+};
+
+export const getChallengeLockStatus = async (recipeId) => {
+    const response = await axios.get(`${API_URL}/recipe/${recipeId}/lock-status`, {
         headers: getAuthHeader()
     });
     return response.data;

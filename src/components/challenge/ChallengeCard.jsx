@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function ChallengeCard({ challenge, onJoin, loading }) {
+export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: initialJoined, loading }) {
   const navigate = useNavigate();
-  const [isJoined, setIsJoined] = useState(false);
+  // If initialJoined is provided (from parent), use it. Otherwise default false.
+  // Ideally, parent controls this fully, but we kept local state previously.
+  // Let's rely on props if passed, or just use the prop directly if we are confident data refetch works.
+
+  // Actually, to make "Unjoin" work dynamically, we should rely on the parent's data. 
+  // "initialJoined" suggests it's just initial. Let's rename prop to `joined` for clarity in usage.
+  const joined = initialJoined;
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -13,35 +19,48 @@ export default function ChallengeCard({ challenge, onJoin, loading }) {
     });
   };
 
-  const dateRange = challenge.startDate && challenge.endDate 
+  const dateRange = challenge.startDate && challenge.endDate
     ? `${formatDate(challenge.startDate)} - ${formatDate(challenge.endDate)}`
     : "Flexible Dates";
 
   const handleCardClick = () => {
-    navigate(`/challenges/${challenge._id}`);
+    if (joined && challenge.recipe) {
+      navigate(`/recipes/${challenge.recipe._id || challenge.recipe}`);
+    } else {
+      // Or maybe details page? User asked "when i click on the challenge i should see the recipe"
+      // But usually cards go to details. Let's redirect to recipe if joined, else maybe details?
+      // For this specific request: "when i click on the challenge i should see the recipe" implies direct recipe access.
+      if (challenge.recipe) navigate(`/recipes/${challenge.recipe._id || challenge.recipe}`);
+    }
   };
 
-  const handleJoinClick = async (e) => {
-    e.stopPropagation(); // Prevents navigating to details page
-    if (isJoined) return;
+  const handleActionClick = async (e) => {
+    e.stopPropagation();
+    if (loading) return;
 
-    const success = await onJoin(challenge._id);
-    if (success) {
-      setIsJoined(true);
+    if (joined) {
+      if (onUnjoin) onUnjoin(challenge._id);
+    } else {
+      if (onJoin) onJoin(challenge._id);
     }
   };
 
   return (
-    <div 
+    <div
       onClick={handleCardClick}
-      className="cursor-pointer bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-md transition-shadow duration-300"
+      className="cursor-pointer bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-md transition-shadow duration-300 group"
     >
-      <div className="h-48 w-full overflow-hidden bg-gray-100">
+      <div className="h-48 w-full overflow-hidden bg-gray-100 relative">
         <img
           src={challenge.image || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"}
           alt={challenge.title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
+        {joined && (
+          <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            Active
+          </div>
+        )}
       </div>
 
       <div className="p-6 flex flex-col flex-1">
@@ -64,7 +83,7 @@ export default function ChallengeCard({ challenge, onJoin, loading }) {
 
           <div className="flex items-center gap-2">
             {challenge.badge?.icon && (
-               <img src={challenge.badge.icon} alt="badge" className="w-6 h-6" />
+              <img src={challenge.badge.icon} alt="badge" className="w-6 h-6" />
             )}
             <span className="text-[10px] font-bold text-gray-400">{challenge.badge?.name}</span>
           </div>
@@ -72,21 +91,20 @@ export default function ChallengeCard({ challenge, onJoin, loading }) {
 
         <div className="mt-auto">
           <button
-            onClick={handleJoinClick}
-            disabled={loading || isJoined}
-            className={`w-full py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] ${
-              isJoined 
-                ? "bg-green-100 text-green-600 cursor-default" 
+            onClick={handleActionClick}
+            disabled={loading}
+            className={`w-full py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] ${joined
+                ? "bg-red-50 text-red-500 hover:bg-red-100 border border-red-100"
                 : "bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white"
-            }`}
+              }`}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Joining...
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                Processing...
               </span>
-            ) : isJoined ? (
-              "✓ Joined"
+            ) : joined ? (
+              "Unjoin Challenge"
             ) : (
               "Join Now"
             )}
