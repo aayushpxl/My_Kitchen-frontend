@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageUtils";
 
 export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: initialJoined, loading }) {
   const navigate = useNavigate();
@@ -24,14 +25,8 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
     : "Flexible Dates";
 
   const handleCardClick = () => {
-    if (joined && challenge.recipe) {
-      navigate(`/recipes/${challenge.recipe._id || challenge.recipe}`);
-    } else {
-      // Or maybe details page? User asked "when i click on the challenge i should see the recipe"
-      // But usually cards go to details. Let's redirect to recipe if joined, else maybe details?
-      // For this specific request: "when i click on the challenge i should see the recipe" implies direct recipe access.
-      if (challenge.recipe) navigate(`/recipes/${challenge.recipe._id || challenge.recipe}`);
-    }
+    // Always go to challenge details first
+    navigate(`/challenges/${challenge._id}`);
   };
 
   const handleActionClick = async (e) => {
@@ -52,7 +47,7 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
     >
       <div className="h-48 w-full overflow-hidden bg-gray-100 relative">
         <img
-          src={challenge.image || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"}
+          src={getImageUrl(challenge.recipe?.image || challenge.image)}
           alt={challenge.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -83,7 +78,7 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
 
           <div className="flex items-center gap-2">
             {challenge.badge?.icon && (
-              <img src={challenge.badge.icon} alt="badge" className="w-6 h-6" />
+              <img src={getImageUrl(challenge.badge.icon)} alt="badge" className="w-6 h-6" />
             )}
             <span className="text-[10px] font-bold text-gray-400">{challenge.badge?.name}</span>
           </div>
@@ -94,8 +89,8 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
             onClick={handleActionClick}
             disabled={loading}
             className={`w-full py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] ${joined
-                ? "bg-red-50 text-red-500 hover:bg-red-100 border border-red-100"
-                : "bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white"
+              ? "bg-red-50 text-red-500 hover:bg-red-100 border border-red-100"
+              : "bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white"
               }`}
           >
             {loading ? (

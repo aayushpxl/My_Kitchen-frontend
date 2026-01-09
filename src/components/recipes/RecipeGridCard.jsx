@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Bookmark, Heart } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { toggleSaveRecipe } from '../../api/recipeApi';
 import { toast } from 'react-toastify';
 import { getImageUrl } from '../../utils/imageUtils';
+import AuthModal from '../common/AuthModal';
 
 const RecipeGridCard = ({ recipe }) => {
     const { user, fetchUser } = useAuth();
+    const navigate = useNavigate();
     const [isSaving, setIsSaving] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     const isSaved = user?.savedRecipes?.includes(recipe._id);
 
@@ -21,7 +24,7 @@ const RecipeGridCard = ({ recipe }) => {
         e.stopPropagation();
 
         if (!user) {
-            toast.info("Please login to save recipes!");
+            setIsAuthModalOpen(true);
             return;
         }
 
@@ -39,8 +42,17 @@ const RecipeGridCard = ({ recipe }) => {
         }
     };
 
+    const handleStartCooking = () => {
+        if (!user) {
+            setIsAuthModalOpen(true);
+        } else {
+            navigate(`/recipes/${recipe._id}`);
+        }
+    };
+
     return (
         <div className="group relative bg-white rounded-[2.5rem] p-5 border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 flex flex-col h-full overflow-hidden">
+            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
             {/* Image Section - Scaled down slightly with a more refined shape */}
             <div className="relative aspect-square mb-5 overflow-hidden rounded-[2rem]">
@@ -144,15 +156,15 @@ const RecipeGridCard = ({ recipe }) => {
                 )}
 
                 {/* Action - Minimalist Button */}
-                <Link
-                    to={`/recipes/${recipe._id}`}
+                <button
+                    onClick={handleStartCooking}
                     className="mt-auto flex items-center justify-between w-full bg-gray-900 text-white py-4 px-6 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-200 active:scale-[0.97]"
                 >
                     <span>Start Cooking</span>
                     <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                </Link>
+                </button>
             </div>
         </div>
     );

@@ -1,111 +1,188 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import api from "../../api/api"; // Your Axios instance
+import { useParams, useNavigate } from "react-router-dom";
+import { getChallengeById, joinChallenge, getMyChallenges } from "../../api/challengeApi";
+import { useAuth } from "../../context/AuthContext";
+import Navbar from "../../components/common/Navbar";
+import { toast } from "react-toastify";
+import Button from "../../components/ui/Button";
+import { getImageUrl } from "../../utils/imageUtils";
 
 export default function ChallengeDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [challenge, setChallenge] = useState(null);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [isJoined, setIsJoined] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      const { data } = await api.get(`/challenges/${id}`);
-      setChallenge(data);
+    const fetchData = async () => {
+      try {
+        const [details, myChallenges] = await Promise.all([
+          getChallengeById(id),
+          getMyChallenges() // To check if joined
+        ]);
+
+        setChallenge(details);
+
+        // Check if user has already joined this challenge
+        const joined = myChallenges.some(uc =>
+          (typeof uc.challenge === 'string' ? uc.challenge === id : uc.challenge._id === id) &&
+          uc.status !== 'completed' // If completed, maybe still show as joined or completed logic?
+          // Actually, if completed, we might want to show "Completed".
+        );
+
+        // Better logic: Find the specific user challenge record
+        const userChallengeRecord = myChallenges.find(uc =>
+          (typeof uc.challenge === 'string' ? uc.challenge === id : uc.challenge._id === id)
+        );
+
+        if (userChallengeRecord) {
+          setIsJoined(true);
+          // We could store status here too if we want to show "Completed" differently
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch details", error);
+        toast.error("Could not load challenge details");
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchDetails();
-  }, [id]);
 
-  if (!challenge) return <div>Loading...</div>;
+    if (user) fetchData();
+  }, [id, user]);
 
-  const steps = challenge.recipe?.instructions || [];
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  const handleJoin = async () => {
+    setActionLoading(true);
+    try {
+      await joinChallenge(id);
+      setIsJoined(true);
+      toast.success("Joined Successfully! Let's get cooking! 👨‍🍳");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to join");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStart = () => {
+    // Navigate to the LOCKABLE recipe page
+    navigate(`/challenges/recipe/${challenge.recipe._id || challenge.recipe}`);
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!challenge) return <div className="min-h-screen flex items-center justify-center">Challenge not found</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-      
-      {/* LEFT COLUMN: Recipe Steps */}
-      <div className="lg:col-span-8">
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm font-medium mb-2">
-            <span>Your Progress</span>
-            <span className="text-orange-500">Step {currentStep + 1} of {steps.length}</span>
-          </div>
-          <div className="w-full bg-gray-200 h-2 rounded-full">
-            <div 
-              className="bg-orange-500 h-2 rounded-full transition-all" 
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 font-sans">
+      <Navbar />
 
-        {/* Step Card */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-          <div className="flex justify-between items-center mb-6">
-            <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm">
-              Step {currentStep + 1}
-            </span>
-            <span className="text-gray-400 text-sm">⏱️ 8 minutes</span>
+      <main className="max-w-6xl mx-auto px-4 py-8 pt-24">
+        {/* Back Link */}
+        <button onClick={() => navigate('/challenges')} className="text-gray-500 hover:text-orange-600 mb-6 flex items-center gap-2 font-medium">
+          ← Back to Challenges
+        </button>
+
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+          {/* Hero Section with Image */}
+          <div className="relative h-64 md:h-96 w-full">
+            <img
+              src={getImageUrl(challenge.recipe?.image || challenge.image)}
+              alt={challenge.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 text-white">
+              <div className="flex items-center gap-4 mb-4">
+                <span className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
+                  {challenge.difficulty || "Medium"} Difficulty
+                </span>
+                <span className="bg-white/20 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-white/30">
+                  {challenge.points} Points Reward
+                </span>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">{challenge.title}</h1>
+              <p className="text-lg md:text-xl text-gray-200 max-w-2xl font-medium leading-relaxed">{challenge.description}</p>
+            </div>
           </div>
 
-          <img 
-            src={challenge.recipe?.image} 
-            className="w-full h-80 object-cover rounded-2xl mb-6" 
-            alt="Step" 
-          />
+          <div className="p-8 md:p-12 grid md:grid-cols-3 gap-12">
+            {/* Left: Info & Actions */}
+            <div className="md:col-span-2 space-y-10">
+              {/* Badge Reward */}
+              {challenge.badge && (
+                <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-3xl border border-orange-100 flex items-center gap-6">
+                  <div className="bg-white p-4 rounded-2xl shadow-sm text-4xl">
+                    {challenge.badge.icon || "🏆"}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-gray-900 mb-1">Earn the "{challenge.badge.name}" Badge</h3>
+                    <p className="text-gray-600">Complete this challenge to add this exclusive badge to your profile.</p>
+                  </div>
+                </div>
+              )}
 
-          <h2 className="text-2xl font-bold mb-4">{steps[currentStep]?.title || "Instructions"}</h2>
-          <p className="text-gray-600 mb-8">{steps[currentStep]?.text}</p>
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-4">
-            <button 
-              disabled={currentStep === 0}
-              onClick={() => setCurrentStep(prev => prev - 1)}
-              className="flex-1 py-4 bg-gray-50 text-gray-500 rounded-2xl font-bold disabled:opacity-50"
-            >
-              ← Previous Step
-            </button>
-            <button 
-              onClick={() => currentStep < steps.length - 1 ? setCurrentStep(prev => prev + 1) : handleComplete()}
-              className="flex-1 py-4 bg-orange-500 text-white rounded-2xl font-bold"
-            >
-              {currentStep === steps.length - 1 ? "Complete Challenge" : "Next Step →"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT COLUMN: Reward Sidebar */}
-      <div className="lg:col-span-4 space-y-6">
-        {/* Unlock Reward Widget */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center">
-          <p className="text-xs uppercase text-gray-400 font-bold mb-2">Unlock Reward</p>
-          <h3 className="text-lg font-bold mb-4">{challenge.badge?.name}</h3>
-          <div className="bg-orange-50 w-32 h-32 mx-auto rounded-2xl flex items-center justify-center mb-4">
-             <span className="text-5xl">🛡️</span>
-          </div>
-          <div className="text-right text-xs text-orange-500 font-bold mb-1">{Math.round(progress)}%</div>
-          <div className="w-full bg-gray-100 h-1.5 rounded-full">
-            <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
-          </div>
-        </div>
-
-        {/* Leaderboard Mockup */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-          <h3 className="font-bold mb-4">Top Participants</h3>
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center gap-3 mb-4">
-              <span className="text-orange-500 font-bold w-4">{i}</span>
-              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">@chef_user{i}</p>
-                <p className="text-xs text-gray-400">2,450 pts</p>
+              {/* About the Recipe */}
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 mb-6">The Challenge Recipe</h3>
+                <div className="flex items-start gap-6">
+                  <img
+                    src={getImageUrl(challenge.recipe?.image)}
+                    className="w-24 h-24 rounded-2xl object-cover shadow-md"
+                    alt="Recipe"
+                  />
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-800 mb-2">{challenge.recipe?.title}</h4>
+                    <p className="text-gray-500 leading-relaxed mb-4 line-clamp-2">{challenge.recipe?.description}</p>
+                    <div className="flex gap-4 text-sm font-bold text-gray-400">
+                      <span>⏱️ {challenge.recipe?.cookingTime || "45m"}</span>
+                      <span>🔥 {challenge.recipe?.nutrition?.calories || "400"} Kcal</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          ))}
+
+            {/* Right: CTA & Stats */}
+            <div className="md:col-span-1 space-y-6">
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-lg shadow-orange-50 sticky top-24">
+                <div className="text-center mb-8">
+                  <p className="text-gray-400 font-medium mb-1">Time Remaining</p>
+                  <h3 className="text-3xl font-black text-gray-900">
+                    {challenge.endDate ? new Date(challenge.endDate).toLocaleDateString() : "Ongoing"}
+                  </h3>
+                </div>
+
+                {isJoined ? (
+                  <Button
+                    onClick={handleStart}
+                    className="w-full py-4 text-lg bg-green-500 hover:bg-green-600 text-white rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 mb-4"
+                  >
+                    Start Cooking Now 🍳
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleJoin}
+                    disabled={actionLoading}
+                    className="w-full py-4 text-lg bg-orange-600 hover:bg-black text-white rounded-2xl shadow-xl shadow-orange-100 transition-all active:scale-95 mb-4"
+                  >
+                    {actionLoading ? "Joining..." : "Join Challenge"}
+                  </Button>
+                )}
+
+                <p className="text-center text-xs text-gray-400 px-4">
+                  {isJoined
+                    ? "You have joined this challenge. Good luck!"
+                    : "Join now to unlock the recipe steps and start earning rewards."}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

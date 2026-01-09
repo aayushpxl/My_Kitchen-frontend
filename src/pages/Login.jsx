@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../components/ui/Button';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import loginPageImage from '../assets/login/new.jpg';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -28,16 +31,16 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white font-sans">
+    <div className="flex h-screen bg-white font-sans overflow-hidden">
       {/* Left Side - Form */}
-      <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center relative">
+      <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center relative overflow-y-auto h-full">
         <Link to="/" className="absolute top-8 left-8 text-gray-400 hover:text-gray-600">
           ← Back
         </Link>
 
         <div className="max-w-md mx-auto w-full">
           <h2 className="text-3xl font-bold text-red-600 mb-2">Login</h2>
-          <p className="text-gray-600 text-sm mb-8">
+          <p className="text-gray-600 text-sm mb-6">
             More than <span className="text-red-500 font-bold">1500+ recipes</span> around the world
           </p>
 
@@ -47,9 +50,11 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
-              <span className="absolute left-3 top-3 text-gray-400">✉️</span>
+              <span className="absolute left-3 top-3 text-gray-400">
+                <Mail size={20} />
+              </span>
               <input
                 type="email" name="email" placeholder="Enter Email"
                 required
@@ -59,13 +64,24 @@ const Login = () => {
             </div>
 
             <div className="relative">
-              <span className="absolute left-3 top-3 text-gray-400">🔒</span>
+              <span className="absolute left-3 top-3 text-gray-400">
+                <Lock size={20} />
+              </span>
               <input
-                type="password" name="password" placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
                 required
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-red-500 focus:outline-none transition-all"
+                className="w-full pl-10 pr-12 py-3 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-red-500 focus:outline-none transition-all"
                 onChange={handleChange}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+              </button>
             </div>
 
             <div className="flex items-center justify-between text-sm text-gray-500">
@@ -99,31 +115,24 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Side - Illustration */}
-      <div className="hidden md:flex w-1/2 bg-amber-100 relative items-center justify-center overflow-hidden">
-        {/* Background Blobs */}
-        <div className="absolute top-10 right-10 w-32 h-32 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      {/* Right Side - Image */}
+      <div className="hidden md:block w-1/2 h-full relative overflow-hidden">
+        <img
+          src={loginPageImage}
+          alt="Kitchen Illustration"
+          className="w-full h-full object-cover bg-gray-50"
+        />
+        {/* Gradle Overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
 
-        {/* Content */}
-        <div className="relative z-10 text-center p-8">
-          {/* Placeholder for Chef Illustration */}
-          <div className="text-8xl mb-6 transform hover:scale-110 transition-transform cursor-pointer">
-            👨‍🍳
+        <div className="absolute bottom-10 left-10 text-white p-8">
+          <div className="inline-block bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-white font-bold text-sm mb-4 border border-white/30">
+            Welcome Back!
           </div>
-          <div className="space-y-2">
-            <div className="inline-block bg-white px-4 py-1 rounded-full text-red-600 font-bold text-sm shadow-sm">
-              Welcome Back!
-            </div>
-            <h2 className="text-3xl font-bold text-gray-800">Master Your Kitchen</h2>
-            <p className="text-gray-600 max-w-sm mx-auto">
-              Sign in to access your saved recipes and meal plans.
-            </p>
-          </div>
-
-          {/* Floating Veggies */}
-          <span className="absolute top-1/4 right-1/4 text-4xl animate-bounce">🥦</span>
-          <span className="absolute bottom-1/4 left-1/4 text-4xl animate-pulse">🍳</span>
+          <h2 className="text-4xl font-bold mb-2">Master Your Kitchen</h2>
+          <p className="text-white/90 max-w-sm">
+            Sign in to access your saved recipes and meal plans.
+          </p>
         </div>
       </div>
     </div>

@@ -1,29 +1,67 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useRecipe, useToggleSaveRecipe } from '../../hooks/useRecipes';
 import { useAuth } from '../../context/AuthContext';
-import Navbar from '../../components/common/Navbar';
+import AppNavBar from '../../components/common/Navbar';
+import LandingNavBar from '../landingpage/NavBar';
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
 import CookingMode from '../../components/recipes/CookingMode';
-import CommunitySection from '../../components/Feedback/CommunitySection'; 
+import CommunitySection from '../../components/Feedback/CommunitySection';
 import { getImageUrl } from '../../utils/imageUtils';
 
 const RecipeDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+
+    // Redirect logic (optional, currently disabled)
+    useEffect(() => {
+        if (!authLoading && !user) {
+            // navigate('/login'); 
+        }
+    }, [user, authLoading, navigate]);
+
     const { data: recipe, isLoading, error } = useRecipe(id);
     const toggleSaveMutation = useToggleSaveRecipe();
+
+    // STRICT: Show Lock Screen if not logged in
+    if (!authLoading && !user) {
+        return (
+            <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
+                {/* Unified Navigation: Show Landing NavBar for public users */}
+                <LandingNavBar />
+
+                <div className="flex-grow flex items-center justify-center p-4">
+                    <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl text-center max-w-md w-full border border-gray-100">
+                        <div className="w-20 h-20 bg-orange-100/50 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
+                            🔒
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-3">Login to View Recipe</h2>
+                        <p className="text-gray-500 mb-8 leading-relaxed">
+                            This recipe is exclusive to our community. Please login or create an account to view the full ingredients and instructions.
+                        </p>
+                        <div className="space-y-3">
+                            <Button className="w-full py-3 text-lg" onClick={() => navigate('/login')}>
+                                Login to Unlock
+                            </Button>
+                            <Link to="/register" className="block text-sm text-orange-600 font-medium hover:underline">
+                                Don't have an account? Sign up
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Loading / Error States
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (error || !recipe) return <div className="min-h-screen flex items-center justify-center text-red-500">Recipe not found</div>;
 
     const isSaved = user?.savedRecipes?.some(r => r === id || r._id === id);
 
     const handleToggleSave = () => {
-        if (!user) {
-            toast.error("Please login to save recipes");
-            navigate("/login");
-            return;
-        }
         toggleSaveMutation.mutate(id, {
             onSuccess: (data) => {
                 toast.success(data.isSaved ? "Recipe Saved!" : "Recipe Removed");
@@ -34,12 +72,10 @@ const RecipeDetail = () => {
         });
     };
 
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    if (error || !recipe) return <div className="min-h-screen flex items-center justify-center text-red-500">Recipe not found</div>;
-
     return (
         <div className="min-h-screen bg-white font-sans overflow-x-hidden">
-            <Navbar />
+            {/* App Navigation: Show App NavBar for logged-in users */}
+            <AppNavBar />
 
             {/* Hero Image Section */}
             <div className="relative h-[400px] w-full">
@@ -128,9 +164,9 @@ const RecipeDetail = () => {
             </div>
 
             {/* ✅ Community Section Implementation */}
-            <CommunitySection 
-                recipeId={id} 
-                reviews={recipe.reviews} 
+            <CommunitySection
+                recipeId={id}
+                reviews={recipe.reviews}
             />
         </div>
     );
