@@ -5,28 +5,29 @@ import landingImage from '../../assets/landing/man.png';
 
 const HeroSection = () => {
     return (
-        <section className="relative w-full min-h-screen bg-transparent overflow-hidden">
-            {/* Background Decorative Elements - Connecting the design */}
+        <section id="hero" className="relative w-full min-h-screen bg-transparent overflow-hidden">
+            {/* Background Decorative Elements */}
             <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-green-50 rounded-full blur-[120px] -z-10 opacity-60 animate-pulse"></div>
             <div className="absolute bottom-[10%] left-[5%] w-[400px] h-[400px] bg-orange-50 rounded-full blur-[100px] -z-10 opacity-60"></div>
 
-            {/* Content Container - Symmetrical with NavBar */}
+            {/* Content Container */}
             <div className="w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-24 flex flex-col md:flex-row items-center justify-between gap-12 pt-32 md:pt-40 pb-20">
 
-                {/* Text Content - Refined Hierarchy */}
+                {/* Text Content */}
                 <motion.div
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="md:flex-1 text-left z-10"
+                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                    className="flex-1 text-left z-10"
                 >
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.4 }}
                         className="space-y-8"
                     >
-                        <div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.4 }}
+                        >
                             <p className="text-[#D98829] font-bold tracking-[0.2em] text-xs md:text-sm uppercase mb-3">
                                 Your smart cooking companion
                             </p>
@@ -41,14 +42,24 @@ const HeroSection = () => {
                                 </span> <br />
                                 cooking.
                             </h1>
-                        </div>
+                        </motion.div>
 
-                        <p className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-xl font-sans">
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.6 }}
+                            className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-xl font-sans"
+                        >
                             My Kitchen is your personal cooking assistant designed to make meal preparation easier and more
                             inspiring. Discover healthy, quick, and budget-friendly meal ideas.
-                        </p>
+                        </motion.p>
 
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-10 pt-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.8 }}
+                            className="flex flex-col sm:flex-row items-start sm:items-center gap-10 pt-4"
+                        >
                             <motion.button
                                 whileHover={{ scale: 1.05, shadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
                                 whileTap={{ scale: 0.95 }}
@@ -79,26 +90,27 @@ const HeroSection = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </motion.div>
 
-                {/* Hero Image - Impactful & Integrated */}
+                {/* Hero Image */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9, x: 50 }}
                     animate={{ opacity: 1, scale: 1, x: 0 }}
-                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-                    className="md:flex-1 flex justify-center md:justify-end z-10"
+                    transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                    className="flex-1 flex justify-center md:justify-end z-10"
                 >
-                    <div className="relative w-full max-w-[700px]">
+                    <div
+                        className="relative w-full max-w-[800px] md:translate-x-12 lg:translate-x-24 scale-110"
+                    >
                         <img
                             src={landingImage}
                             alt="Cooking Professional"
-                            className="w-full h-auto max-h-[75vh] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.1)]"
+                            className="w-full h-auto max-h-[85vh] object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.1)]"
                         />
                     </div>
                 </motion.div>
-
             </div>
         </section>
     );

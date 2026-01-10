@@ -11,23 +11,68 @@ const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+
+      // Smart Scroll Tracking for Home Page
+      if (location.pathname === '/') {
+        const sections = ['hero', 'popular-recipes', 'reviews'];
+        const scrollPosition = window.scrollY + 100;
+
+        // If at the very top, always show Features
+        if (window.scrollY < 300) {
+          setActive('Features');
+          return;
+        }
+
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const { offsetTop, offsetHeight } = element;
+            if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+              if (sectionId === 'hero') setActive('Features');
+              else if (sectionId === 'popular-recipes') setActive('View Recipes');
+              else if (sectionId === 'reviews') setActive('Reviews');
+              break;
+            }
+          }
+        }
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    if (location.hash === '#popular-recipes') setActive('Recipes');
-    else if (location.pathname === '/' && !location.hash) setActive('Features');
-    else if (location.hash === '#reviews') setActive('Reviews');
-    else setActive('');
-  }, [location.pathname, location.hash]);
+  }, [location.pathname]);
 
   const navLinks = [
-    { name: 'Features', path: '/', id: null },
+    { name: 'Features', path: '/', id: 'hero' },
     { name: 'View Recipes', path: '/#popular-recipes', id: 'popular-recipes' },
     { name: 'Reviews', path: '/#reviews', id: 'reviews' },
   ];
+
+  const handleNavClick = (e, link) => {
+    if (location.pathname === '/') {
+      e.preventDefault();
+      if (link.id === 'hero') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const element = document.getElementById(link.id);
+        if (element) {
+          const offset = 80; // Account for fixed NavBar
+          const bodyRect = document.body.getBoundingClientRect().top;
+          const elementRect = element.getBoundingClientRect().top;
+          const elementPosition = elementRect - bodyRect;
+          const offsetPosition = elementPosition - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      }
+      setActive(link.name);
+    }
+  };
 
   return (
     <motion.nav
@@ -39,7 +84,11 @@ const NavBar = () => {
         : 'bg-white/60 backdrop-blur-md py-6'
         }`}
     >
-      <Link to="/" className="group flex items-center gap-2">
+      <Link
+        to="/"
+        onClick={(e) => handleNavClick(e, { id: 'hero', name: 'Features' })}
+        className="group flex items-center gap-2"
+      >
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -54,13 +103,7 @@ const NavBar = () => {
           <Link
             key={link.name}
             to={link.path}
-            onClick={(e) => {
-              if (link.id && location.pathname === '/') {
-                e.preventDefault();
-                document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth' });
-              }
-              setActive(link.name);
-            }}
+            onClick={(e) => handleNavClick(e, link)}
             className="relative group py-1"
           >
             <span className={`text-lg font-semibold transition-all duration-300 ${active === link.name ? 'text-orange-500' : 'text-gray-600 group-hover:text-gray-900 text-opacity-80 group-hover:text-opacity-100'

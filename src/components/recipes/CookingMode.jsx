@@ -5,7 +5,7 @@ import { checkChallengeCompletion, getChallengeLockStatus } from '../../api/chal
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-const CookingMode = ({ recipe }) => {
+const CookingMode = ({ recipe, isChallengeMode = false }) => {
     const navigate = useNavigate();
     const [isStarted, setIsStarted] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
@@ -18,7 +18,7 @@ const CookingMode = ({ recipe }) => {
     const [lockInfo, setLockInfo] = useState(null);
 
     useEffect(() => {
-        if (recipe?._id) {
+        if (isChallengeMode && recipe?._id) {
             getChallengeLockStatus(recipe._id).then(data => {
                 if (data.locked) {
                     setIsLocked(true);
@@ -26,7 +26,7 @@ const CookingMode = ({ recipe }) => {
                 }
             }).catch(err => console.error("Lock check fail", err));
         }
-    }, [recipe]);
+    }, [recipe, isChallengeMode]);
 
     // If no steps, show message
     if (!steps || steps.length === 0) {
@@ -41,13 +41,17 @@ const CookingMode = ({ recipe }) => {
             setCurrentStep(prev => prev + 1);
         } else {
             setIsCompleted(true);
-            try {
-                const result = await checkChallengeCompletion(recipe._id);
-                if (result.success) {
-                    toast.success(`Challenge Completed! +${result.earnedPoints} Points! 🏆`);
+
+            // Only check for challenge completion if in challenge mode
+            if (isChallengeMode) {
+                try {
+                    const result = await checkChallengeCompletion(recipe._id);
+                    if (result.success) {
+                        toast.success(`Challenge Completed! +${result.earnedPoints} Points! 🏆`);
+                    }
+                } catch (error) {
+                    console.error("Failed to check challenge completion", error);
                 }
-            } catch (error) {
-                console.error("Failed to check challenge completion", error);
             }
         }
     };

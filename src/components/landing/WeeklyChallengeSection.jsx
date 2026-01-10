@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '../ui/Button';
+import pastaImage from '../../assets/landing/pasta_challenge.png';
 
 const WeeklyChallengeSection = () => {
     return (
@@ -12,9 +13,12 @@ const WeeklyChallengeSection = () => {
             <div className="bg-green-50 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8 md:gap-16">
                 <div className="w-full md:w-1/3">
                     <div className="aspect-video bg-gray-300 rounded-xl overflow-hidden shadow-md relative group">
-                        {/* Image Placeholder */}
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
-                        <div className="w-full h-full flex items-center justify-center text-6xl">🍝</div>
+                        <img
+                            src={pastaImage}
+                            alt="Master Italian Pasta"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                     </div>
                 </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useRecipe, useToggleSaveRecipe } from '../../hooks/useRecipes';
 import { useAuth } from '../../context/AuthContext';
 import AppNavBar from '../../components/common/Navbar';
@@ -9,11 +9,18 @@ import { toast } from 'react-toastify';
 import CookingMode from '../../components/recipes/CookingMode';
 import CommunitySection from '../../components/Feedback/CommunitySection';
 import { getImageUrl } from '../../utils/imageUtils';
+import { Download, FileText, File as FileIcon } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 const RecipeDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, loading: authLoading } = useAuth();
+
+    // Check if accessed through challenge workflow
+    const isChallengeMode = location.pathname.startsWith('/challenges/recipe/');
+
 
     // Redirect logic (optional, currently disabled)
     useEffect(() => {
@@ -70,6 +77,100 @@ const RecipeDetail = () => {
                 toast.error(err.response?.data?.message || "Failed to save");
             }
         });
+    };
+
+    const downloadShoppingList = () => {
+        if (!recipe || !recipe.ingredients) return;
+
+        const header = `🛒 MY KITCHEN SHOPPING LIST\n`;
+        const title = `Recipe: ${recipe.title.toUpperCase()}\n`;
+        const date = `Date: ${new Date().toLocaleDateString()}\n`;
+        const separator = "==========================================\n\n";
+
+        const ingredientsText = recipe.ingredients
+            .map(ing => `[ ] ${ing.name.padEnd(25)} ${ing.quantity} ${ing.unit}`)
+            .join('\n');
+
+        const footer = `\n\n${separator}Happy Cooking! Visit us for more recipes.\nMy Kitchen - Your Personal Culinary Assistant`;
+
+        const fullContent = header + title + date + separator + ingredientsText + footer;
+
+        const blob = new Blob([fullContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${recipe.title.toLowerCase().replace(/\s+/g, '-')}-shopping-list.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast.success("Shopping list downloaded!");
+    };
+
+    const downloadPDF = () => {
+        if (!recipe || !recipe.ingredients) return;
+
+        const doc = new jsPDF();
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(217, 136, 41); // Orange
+        doc.text("MY KITCHEN", 105, 20, { align: "center" });
+
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text("Your Personal Culinary Assistant", 105, 28, { align: "center" });
+
+        doc.setDrawColor(240);
+        doc.line(20, 35, 190, 35);
+
+        // Recipe Title
+        doc.setFontSize(18);
+        doc.setTextColor(40);
+        doc.text(recipe.title.toUpperCase(), 20, 50);
+
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 58);
+
+        // Ingredients Header
+        doc.setFontSize(14);
+        doc.setTextColor(40);
+        doc.text("SHOPPING LIST / INGREDIENTS", 20, 75);
+
+        // Ingredients List
+        let yPos = 85;
+        doc.setFontSize(11);
+        doc.setTextColor(60);
+
+        recipe.ingredients.forEach((ing, index) => {
+            if (yPos > 270) {
+                doc.addPage();
+                yPos = 20;
+            }
+
+            // Draw checkbox
+            doc.setDrawColor(200);
+            doc.rect(20, yPos - 4, 4, 4);
+
+            doc.text(`${ing.name}`, 30, yPos);
+            doc.text(`${ing.quantity} ${ing.unit}`, 150, yPos);
+
+            yPos += 10;
+            doc.setDrawColor(245);
+            doc.line(20, yPos - 5, 190, yPos - 5);
+        });
+
+        // Footer
+        const finalY = Math.min(yPos + 20, 280);
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text("==========================================", 105, finalY, { align: "center" });
+        doc.text("Happy Cooking! Visit My Kitchen for more recipes.", 105, finalY + 7, { align: "center" });
+
+        doc.save(`${recipe.title.toLowerCase().replace(/\s+/g, '-')}-shopping-list.pdf`);
+        toast.success("PDF Shopping list downloaded!");
     };
 
     return (
@@ -136,7 +237,7 @@ const RecipeDetail = () => {
                                 </div>
                             </div>
                         ) : (
-                            <CookingMode recipe={recipe} />
+                            <CookingMode recipe={recipe} isChallengeMode={isChallengeMode} />
                         )}
                     </section>
                 </div>
@@ -158,6 +259,29 @@ const RecipeDetail = () => {
                                     </li>
                                 ))}
                             </ul>
+                        )}
+
+                        {!recipe.isLocked && (
+                            <div className="mt-8 space-y-3">
+                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest text-center mb-4">Download Shopping List</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        onClick={downloadPDF}
+                                        className="flex flex-col items-center justify-center gap-2 bg-orange-500 text-white font-bold py-4 rounded-2xl hover:bg-orange-600 transition-all duration-300 shadow-md hover:shadow-orange-200 group active:scale-95"
+                                    >
+                                        <FileIcon size={20} />
+                                        <span className="text-xs">PDF Document</span>
+                                    </button>
+                                    <button
+                                        onClick={downloadShoppingList}
+                                        className="flex flex-col items-center justify-center gap-2 bg-white border-2 border-gray-100 text-gray-600 font-bold py-4 rounded-2xl hover:border-orange-200 hover:text-orange-500 transition-all duration-300 shadow-sm group active:scale-95"
+                                    >
+                                        <FileText size={20} />
+                                        <span className="text-xs">TXT File</span>
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-gray-400 text-center font-medium">Ready for your supermarket trip!</p>
+                            </div>
                         )}
                     </div>
                 </div>
