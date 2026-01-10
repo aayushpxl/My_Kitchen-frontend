@@ -174,7 +174,7 @@ const RecipeDetail = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans overflow-x-hidden">
+        <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white font-sans overflow-x-hidden pt-24">
             {/* App Navigation: Show App NavBar for logged-in users */}
             <AppNavBar />
 
