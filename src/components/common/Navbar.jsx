@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Search, User, UtensilsCrossed, X } from 'lucide-react';
 import axios from 'axios';
 import Button from '../ui/Button';
+import logo from '../../assets/mykitchenlogo.png';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -110,22 +111,14 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto flex items-center justify-between">
 
                 {/* Logo Section */}
-                <Link to="/home" className="flex items-center gap-3 group">
-                    <div className="relative w-11 h-11 transition-transform group-hover:scale-110 duration-300">
-                        <div className="absolute inset-0 bg-orange-200 rounded-xl blur-lg opacity-0 group-hover:opacity-70 transition-opacity"></div>
-                        <img
-                            src="https://img.icons8.com/color/96/restaurant-.png"
-                            alt="Logo"
-                            className="relative w-full h-full object-contain"
-                        />
-                    </div>
-                    <div className="flex flex-col leading-none">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">My</span>
-                        <span className="text-2xl font-black bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent font-serif">
-                            Kitchen
-                        </span>
-                    </div>
+                <Link to="/home" className="flex items-center group">
+                    <img
+                        src={logo}
+                        alt="My Kitchen Logo"
+                        className="h-14 w-auto object-contain transition-transform group-hover:scale-105 duration-300"
+                    />
                 </Link>
+
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-1">
@@ -243,10 +236,12 @@ const Navbar = () => {
                     <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
                         <Link to="/profile" className="flex items-center gap-3 group/profile">
                             <div className="group relative">
-                                <div className={`w-10 h-10 rounded-2xl p-[2px] shadow-md transition-all duration-300 group-hover/profile:rotate-6 ${isActive('/profile') ? 'bg-orange-500 rotate-6' : 'bg-gradient-to-tr from-orange-400 to-red-500'}`}>
+                                <div className="w-10 h-10 rounded-2xl transition-all duration-300 group-hover/profile:scale-105">
                                     <div className="w-full h-full rounded-[14px] bg-white overflow-hidden p-0.5">
                                         <img
-                                            src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff&bold=true`}
+                                            src={user?.profilePic
+                                                ? `http://localhost:5000${user.profilePic}`
+                                                : `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff&bold=true`}
                                             alt="User"
                                             className="w-full h-full rounded-[12px] object-cover"
                                         />
@@ -302,7 +297,9 @@ const Navbar = () => {
                     <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
                         <Link to="/profile" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3">
                             <img
-                                src={`https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff`}
+                                src={user?.profilePic
+                                    ? `http://localhost:5000${user.profilePic}`
+                                    : `https://ui-avatars.com/api/?name=${user?.username || 'User'}&background=FF6B00&color=fff`}
                                 alt="User"
                                 className="w-10 h-10 rounded-xl"
                             />

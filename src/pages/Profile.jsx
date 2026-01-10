@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getMyChallenges } from '../api/challengeApi';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, LogOut } from 'lucide-react';
 import { useUserProfile } from '../hooks/useAuthHooks';
 import { useAuth } from '../context/AuthContext';
 import Interests from '../components/Profile/Interests';
@@ -219,7 +219,7 @@ const Profile = () => {
               <div className="relative w-24 h-24 mx-auto mb-4 group">
                 <img
                   src={previewUrl || `https://ui-avatars.com/api/?name=${user.username}&background=E5F0FF&color=1D4ED8&size=128`}
-                  className="w-full h-full rounded-full object-cover border-2 border-orange-100"
+                  className="w-full h-full rounded-full object-cover"
                   alt="avatar"
                 />
                 <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
@@ -270,12 +270,15 @@ const Profile = () => {
             </nav>
 
             {/* LOGOUT BUTTON */}
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="text-sm text-gray-400 hover:text-red-500 flex items-center gap-2 pl-2"
-            >
-              ← Log-out
-            </button>
+            <div className="pt-4 mt-4 border-t border-gray-100">
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-red-200 group/logout"
+              >
+                <LogOut size={18} className="transition-transform group-hover/logout:-translate-x-1" />
+                Logout Account
+              </button>
+            </div>
           </aside>
 
           {/* RIGHT CONTENT */}

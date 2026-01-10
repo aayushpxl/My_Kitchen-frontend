@@ -191,8 +191,10 @@ const RecipeDetail = () => {
                                     👤 By {recipe.createdBy.username || "Unknown"}
                                 </Link>
                             )}
-                            {recipe.nutrition?.calories && (
-                                <span className="flex items-center gap-1">🔥 {recipe.nutrition.calories} Kcal</span>
+                            {recipe.cookingTime && (
+                                <span className="flex items-center gap-1 bg-white/20 backdrop-blur px-3 py-1 rounded-full">
+                                    ⏱️ {recipe.cookingTime}
+                                </span>
                             )}
                             <span className={`flex items-center gap-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur ${recipe.difficulty === 'Easy' ? 'text-emerald-400' : recipe.difficulty === 'Hard' ? 'text-rose-400' : 'text-amber-400'}`}>
                                 📊 {recipe.difficulty}
@@ -221,6 +223,22 @@ const RecipeDetail = () => {
                             ))}
                         </div>
                     </section>
+
+                    {recipe.proTips && recipe.proTips.length > 0 && (
+                        <section className="bg-amber-50/50 p-6 rounded-3xl border border-amber-100">
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                💡 Pro Tips
+                            </h2>
+                            <ul className="space-y-3">
+                                {recipe.proTips.map((tip, idx) => (
+                                    <li key={idx} className="flex gap-3 text-gray-700">
+                                        <span className="text-orange-500 font-bold">•</span>
+                                        {tip}
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
 
                     <section>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Instructions</h2>
@@ -280,7 +298,44 @@ const RecipeDetail = () => {
                                         <span className="text-xs">TXT File</span>
                                     </button>
                                 </div>
-                                <p className="text-[10px] text-gray-400 text-center font-medium">Ready for your supermarket trip!</p>
+                            </div>
+                        )}
+
+                        {recipe.nutrition && !recipe.isLocked && (
+                            <div className="mt-8 pt-8 border-t border-orange-100">
+                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Nutrition Facts</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="bg-white p-3 rounded-2xl border border-orange-50">
+                                        <div className="text-[10px] text-gray-400 uppercase font-bold">Calories</div>
+                                        <div className="text-sm font-black text-gray-800">{recipe.nutrition.calories || '-'}</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-2xl border border-orange-50">
+                                        <div className="text-[10px] text-gray-400 uppercase font-bold">Protein</div>
+                                        <div className="text-sm font-black text-gray-800">{recipe.nutrition.protein || '-'}</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-2xl border border-orange-50">
+                                        <div className="text-[10px] text-gray-400 uppercase font-bold">Carbs</div>
+                                        <div className="text-sm font-black text-gray-800">{recipe.nutrition.carbs || '-'}</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-2xl border border-orange-50">
+                                        <div className="text-[10px] text-gray-400 uppercase font-bold">Fat</div>
+                                        <div className="text-sm font-black text-gray-800">{recipe.nutrition.fat || '-'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {recipe.substitutes && recipe.substitutes.length > 0 && !recipe.isLocked && (
+                            <div className="mt-8 pt-8 border-t border-orange-100">
+                                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Substitutes</h3>
+                                <div className="space-y-3">
+                                    {recipe.substitutes.map((sub, idx) => (
+                                        <div key={idx} className="text-xs">
+                                            <span className="font-bold text-gray-700">{sub.ingredient}: </span>
+                                            <span className="text-gray-500">{sub.alternatives.join(', ')}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>

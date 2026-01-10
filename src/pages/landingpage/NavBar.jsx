@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Button from '../../components/ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../../assets/mykitchenlogo.png';
 
 const NavBar = () => {
   const { user } = useAuth();
@@ -92,9 +93,13 @@ const NavBar = () => {
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="text-3xl font-serif font-bold text-gray-900"
+          className="flex items-center"
         >
-          My <span className="text-orange-500 italic transition-colors group-hover:text-orange-600">Kitchen</span>
+          <img
+            src={logo}
+            alt="My Kitchen Logo"
+            className="h-12 w-auto object-contain"
+          />
         </motion.div>
       </Link>
 
