@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getAllRecipes, deleteRecipe } from '../../api/recipeApi';
 import { Pencil, Trash2, Plus, Eye, Search, Filter, Calendar, User, ChefHat } from 'lucide-react';
 import { getImageUrl } from '../../utils/imageUtils';
+import DeleteModal from '../../components/admin/DeleteModal';
 
 const AdminRecipes = () => {
     const [recipes, setRecipes] = useState([]);
@@ -10,6 +11,10 @@ const AdminRecipes = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterRole, setFilterRole] = useState('all');
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [recipeToDelete, setRecipeToDelete] = useState(null);
 
     useEffect(() => {
         fetchRecipes();
@@ -46,11 +51,18 @@ const AdminRecipes = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this recipe?")) return;
+    const handleDeleteClick = (recipe) => {
+        setRecipeToDelete(recipe);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!recipeToDelete) return;
         try {
-            await deleteRecipe(id);
-            setRecipes(recipes.filter(r => r._id !== id));
+            await deleteRecipe(recipeToDelete._id);
+            setRecipes(recipes.filter(r => r._id !== recipeToDelete._id));
+            setIsDeleteModalOpen(false);
+            setRecipeToDelete(null);
         } catch (error) {
             console.error("Failed to delete recipe", error);
             alert("Failed to delete recipe");
@@ -155,8 +167,8 @@ const AdminRecipes = () => {
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${recipe.createdByRole === 'admin'
-                                                ? 'bg-purple-50 text-purple-600 ring-1 ring-inset ring-purple-200'
-                                                : 'bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200'
+                                            ? 'bg-purple-50 text-purple-600 ring-1 ring-inset ring-purple-200'
+                                            : 'bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-200'
                                             }`}>
                                             <User size={12} />
                                             {recipe.createdBy?.username || 'Unknown'}
@@ -199,7 +211,7 @@ const AdminRecipes = () => {
                                             )}
 
                                             <button
-                                                onClick={() => handleDelete(recipe._id)}
+                                                onClick={() => handleDeleteClick(recipe)}
                                                 className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                                                 title="Delete Recipe"
                                             >
@@ -225,6 +237,15 @@ const AdminRecipes = () => {
                     </table>
                 </div>
             </div>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Recipe?"
+                message="Are you sure you want to remove this recipe from the vault? This action will permanently delete all recipe data."
+                itemName={recipeToDelete?.title}
+            />
         </div>
     );
 };

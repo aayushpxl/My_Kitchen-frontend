@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Clock, Users, Flame, ChevronLeft, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, Users, Flame, ChevronLeft, CheckCircle, XCircle, Utensils, Tag, Activity, Lightbulb, RefreshCw, Star } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { getImageUrl } from '../../utils/imageUtils';
 
@@ -113,11 +113,26 @@ const AdminRecipeDetail = ({ source = 'recipes' }) => {
                             <Flame size={20} className="text-red-500" />
                             <span>{recipe.difficulty || 'Medium'}</span>
                         </div>
+                        <div className="flex items-center gap-2 text-gray-600">
+                            <Utensils size={20} className="text-green-500" />
+                            <span>{recipe.servings || 'N/A'} Servings</span>
+                        </div>
                         <Link to={`/admin/users/${recipe.createdBy?._id}`} className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition">
                             <Users size={20} className="text-blue-500" />
                             <span>By {recipe.createdBy?.username || 'Unknown'}</span>
                         </Link>
                     </div>
+
+                    {/* Tags */}
+                    {recipe.tags && recipe.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-8">
+                            {recipe.tags.map((tag, i) => (
+                                <span key={i} className="flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-600 text-xs font-bold rounded-full border border-orange-100 uppercase">
+                                    <Tag size={12} /> {tag}
+                                </span>
+                            ))}
+                        </div>
+                    )}
 
                     <div className="grid md:grid-cols-2 gap-8">
                         <div>
@@ -147,10 +162,80 @@ const AdminRecipeDetail = ({ source = 'recipes' }) => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Nutrition Facts */}
+                    {recipe.nutrition && (
+                        <div className="mt-12 p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                <Activity size={22} className="text-orange-500" />
+                                Nutrition Facts
+                            </h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <NutritionItem label="Calories" value={recipe.nutrition.calories} unit="kcal" />
+                                <NutritionItem label="Protein" value={recipe.nutrition.protein} unit="g" />
+                                <NutritionItem label="Carbs" value={recipe.nutrition.carbs} unit="g" />
+                                <NutritionItem label="Fat" value={recipe.nutrition.fat} unit="g" />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid md:grid-cols-2 gap-8 mt-12">
+                        {/* Substitutes */}
+                        {recipe.substitutes && recipe.substitutes.length > 0 && (
+                            <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
+                                <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                                    <RefreshCw size={20} />
+                                    Substitutes
+                                </h3>
+                                <div className="space-y-4">
+                                    {recipe.substitutes.map((sub, i) => (
+                                        <div key={i} className="text-sm">
+                                            <p className="font-bold text-blue-800 mb-1">For {sub.ingredient}:</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {sub.alternatives.map((alt, j) => (
+                                                    <span key={j} className="px-2 py-1 bg-white text-blue-600 rounded-md border border-blue-200">
+                                                        {alt}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Pro Tips */}
+                        {recipe.proTips && recipe.proTips.length > 0 && (
+                            <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100">
+                                <h3 className="text-lg font-bold text-amber-900 mb-4 flex items-center gap-2">
+                                    <Lightbulb size={20} />
+                                    Pro Tips
+                                </h3>
+                                <ul className="space-y-3">
+                                    {recipe.proTips.map((tip, i) => (
+                                        <li key={i} className="flex gap-2 text-sm text-amber-800">
+                                            <Star size={16} className="text-amber-500 flex-shrink-0 mt-0.5" fill="currentColor" />
+                                            {tip}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+
+const NutritionItem = ({ label, value, unit }) => (
+    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+        <span className="text-gray-400 text-xs font-bold uppercase mb-1">{label}</span>
+        <div className="flex items-baseline gap-0.5">
+            <span className="text-xl font-black text-gray-900">{value || '0'}</span>
+            <span className="text-xs text-gray-500 font-bold">{unit}</span>
+        </div>
+    </div>
+);
 
 export default AdminRecipeDetail;

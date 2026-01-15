@@ -1,14 +1,38 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { getImageUrl } from '../../utils/imageUtils';
+import { useAuth } from '../../context/AuthContext';
+import { useToggleSaveRecipe } from '../../hooks/useRecipes';
+import { toast } from 'react-toastify';
 
 const TopChoices = ({ recipes }) => {
+  const { user } = useAuth();
+  const toggleSaveMutation = useToggleSaveRecipe();
+
   if (!recipes || recipes.length === 0) return null;
 
   const getAverageRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, rev) => acc + rev.rating, 0);
     return Math.round((sum / reviews.length) * 10) / 10;
+  };
+
+  const handleToggleSave = (id) => {
+    if (!user) {
+      toast.error("Please login to save recipes");
+      return;
+    }
+    toggleSaveMutation.mutate(id, {
+      onSuccess: (data) => {
+        toast.success(data.isSaved ? "Saved to your list!" : "Removed from your list!");
+      },
+      onError: (err) => {
+        toast.error(err.response?.data?.message || "Something went wrong");
+      }
+    });
+  };
+
+  const isRecipeSaved = (id) => {
+    return user?.savedRecipes?.some(r => r === id || r._id === id);
   };
 
   return (
@@ -44,14 +68,9 @@ const TopChoices = ({ recipes }) => {
         {recipes.slice(0, 4).map((recipe) => (
           <div
             key={recipe._id}
-            className="relative bg-white rounded-[3rem] px-6 pb-6 pt-32 shadow-[0_15px_40px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col items-center group transition-all duration-500 hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] hover:-translate-y-3"
+            className="relative bg-white rounded-[3rem] px-6 pb-6 pt-40 shadow-[0_15px_40px_rgba(0,0,0,0.03)] border border-gray-100/50 flex flex-col items-center group transition-all duration-500 hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] hover:-translate-y-3"
           >
-            {/* Save Icon */}
-            <button className="absolute top-6 right-6 z-20 text-gray-200 hover:text-red-500 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </button>
+
 
             {/* Circular Image - Positioned Absolutely - BIGGER AND BORDERLESS */}
             <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-white p-0 shadow-2xl z-10 group-hover:scale-110 transition-transform duration-700 overflow-hidden">
@@ -65,13 +84,13 @@ const TopChoices = ({ recipes }) => {
 
             {/* Content Section */}
             <div className="text-center w-full mb-4">
-              <div className="flex justify-center gap-1 mb-2">
+              <div className="flex justify-center gap-2 mb-3">
                 {recipe.tags?.slice(0, 1).map((tag, idx) => (
-                  <span key={idx} className="text-[9px] font-black text-orange-400 bg-orange-50 px-2 py-0.5 rounded-md uppercase tracking-tighter">
+                  <span key={idx} className="text-[11px] font-black text-orange-400 bg-orange-50 px-3 py-1 rounded-lg uppercase tracking-tight">
                     #{tag}
                   </span>
                 ))}
-                <span className="text-[9px] font-black text-blue-400 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-tighter">
+                <span className="text-[11px] font-black text-blue-400 bg-blue-50 px-3 py-1 rounded-lg uppercase tracking-tight">
                   🍽️ {recipe.servings || 4}
                 </span>
               </div>
@@ -119,12 +138,25 @@ const TopChoices = ({ recipes }) => {
               </div>
             </div>
 
-            <Link
-              to={`/recipes/${recipe._id}`}
-              className="mt-4 w-full bg-[#E8F8F0] text-[#10B981] text-[11px] font-black py-3 rounded-2xl hover:bg-[#10B981] hover:text-white transition-all duration-300 active:scale-95 text-center shadow-sm hover:shadow-md"
-            >
-              Start Cooking
-            </Link>
+            <div className="mt-4 w-full flex items-center gap-2">
+              <Link
+                to={`/recipes/${recipe._id}`}
+                className="flex-1 bg-[#E8F8F0] text-[#10B981] text-[11px] font-black py-3 rounded-2xl hover:bg-[#10B981] hover:text-white transition-all duration-300 active:scale-95 text-center shadow-sm hover:shadow-md"
+              >
+                Start Cooking
+              </Link>
+              <button
+                onClick={() => handleToggleSave(recipe._id)}
+                className={`p-2.5 rounded-xl transition-all duration-300 shadow-sm ${isRecipeSaved(recipe._id)
+                  ? 'text-red-500 bg-red-50 shadow-red-100'
+                  : 'text-gray-400 bg-gray-50 hover:text-red-400'
+                  } active:scale-90`}
+              >
+                <svg className={`w-5 h-5 ${isRecipeSaved(recipe._id) ? 'fill-current' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </button>
+            </div>
           </div>
         ))}
       </div>

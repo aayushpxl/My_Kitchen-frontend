@@ -34,14 +34,32 @@ const getDashboardStatsFixed = async () => {
     return response.data;
 };
 
+const getDashboardAnalytics = async () => {
+    const response = await axios.get(`${API_URL}/analytics`, getHeaders());
+    return response.data;
+};
+
+const getRecentActivity = async () => {
+    const response = await axios.get(`${API_URL}/recent-activity`, getHeaders());
+    return response.data;
+};
+
 const getAllUsers = async () => {
     const response = await axios.get(`${API_URL}/users`, getHeaders());
     return response.data;
 };
 
+const getUserById = async (id) => {
+    const response = await axios.get(`${API_URL}/users/${id}`, getHeaders());
+    return response.data;
+};
+
 const adminService = {
     getDashboardStats: getDashboardStatsFixed,
-    getAllUsers
+    getAllUsers,
+    getUserById,
+    getDashboardAnalytics,
+    getRecentActivity
 };
 
 export default adminService;

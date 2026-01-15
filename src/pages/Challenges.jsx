@@ -10,11 +10,17 @@ import { Link } from "react-router-dom";
 // --- Sidebar Components ---
 
 const ActiveChallengesWidget = ({ myChallenges = [] }) => {
-  if (myChallenges.length === 0) {
+  const activeOnly = myChallenges.filter(item => {
+    const isCompleted = item.status === 'completed';
+    const isExpired = item.challenge?.endDate && new Date(item.challenge.endDate) < new Date();
+    return !isCompleted && !isExpired;
+  });
+
+  if (activeOnly.length === 0) {
     return (
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
         <h3 className="font-bold text-gray-900 mb-2">Your Active Challenges</h3>
-        <p className="text-sm text-gray-500">You haven't joined any challenges yet.</p>
+        <p className="text-sm text-gray-500">No active challenges at the moment.</p>
       </div>
     );
   }
@@ -23,10 +29,9 @@ const ActiveChallengesWidget = ({ myChallenges = [] }) => {
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-gray-900">Your Active Challenges</h3>
-        <button className="text-xs text-gray-400 hover:text-orange-500">View All</button>
       </div>
       <div className="space-y-6">
-        {myChallenges.slice(0, 3).map((item) => {
+        {activeOnly.slice(0, 3).map((item) => {
           const recipeId = item.challenge?.recipe?._id || item.challenge?.recipe;
           const isCompleted = item.status === 'completed';
           return (
@@ -73,14 +78,15 @@ const UpcomingDeadlinesWidget = () => (
   </div>
 );
 
-const CategoryPills = () => {
-  const categories = ["Trending", "Cooking", "Baking", "Healthy", "Quick Meals", "Seasonal"];
+const CategoryPills = ({ selected, onSelect }) => {
+  const categories = ["All", "Trending", "Cooking", "Baking", "Healthy", "Quick Meals", "Seasonal"];
   return (
     <div className="flex flex-wrap gap-2 my-6">
-      {categories.map((cat, idx) => (
+      {categories.map((cat) => (
         <button
           key={cat}
-          className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${idx === 0
+          onClick={() => onSelect(cat)}
+          className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${selected === cat
             ? "bg-gray-900 text-white shadow-lg"
             : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
@@ -97,6 +103,7 @@ const CategoryPills = () => {
 export default function Challenges() {
   const { challenges, myChallenges, loading, handleJoin, handleUnjoin } = useChallenges();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const renderContent = () => {
     if (loading) {
@@ -110,9 +117,23 @@ export default function Challenges() {
       );
     }
 
-    const displayChallenges = challenges.filter(c =>
+    let displayChallenges = challenges.filter(c =>
       c.title?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    if (selectedCategory !== "All") {
+      if (selectedCategory === "Trending") {
+        // Simple trending logic: show active ones first or sort by participants if we had that count
+        // For now, let's just keep active ones that haven't expired
+        displayChallenges = displayChallenges.filter(c => new Date(c.endDate) > new Date());
+      } else {
+        displayChallenges = displayChallenges.filter(c =>
+          c.category === selectedCategory ||
+          c.title?.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+          c.description?.toLowerCase().includes(selectedCategory.toLowerCase())
+        );
+      }
+    }
 
     return (
       <ScrollFade>
@@ -129,7 +150,7 @@ export default function Challenges() {
 
           <div className="mb-8">
             <h2 className="text-sm font-bold text-gray-900 mb-3">Categories</h2>
-            <CategoryPills />
+            <CategoryPills selected={selectedCategory} onSelect={setSelectedCategory} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

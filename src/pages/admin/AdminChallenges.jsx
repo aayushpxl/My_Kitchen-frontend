@@ -2,10 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllChallengesAdmin, deleteChallenge, updateChallenge } from '../../api/challengeApi';
 import { Pencil, Trash2, Plus, Calendar, Trophy, CheckCircle, XCircle } from 'lucide-react';
+import DeleteModal from '../../components/admin/DeleteModal';
 
 const AdminChallenges = () => {
     const [challenges, setChallenges] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [challengeToDelete, setChallengeToDelete] = useState(null);
 
     useEffect(() => {
         fetchChallenges();
@@ -23,11 +28,18 @@ const AdminChallenges = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this challenge?")) return;
+    const handleDeleteClick = (challenge) => {
+        setChallengeToDelete(challenge);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!challengeToDelete) return;
         try {
-            await deleteChallenge(id);
-            setChallenges(challenges.filter(c => c._id !== id));
+            await deleteChallenge(challengeToDelete._id);
+            setChallenges(challenges.filter(c => c._id !== challengeToDelete._id));
+            setIsDeleteModalOpen(false);
+            setChallengeToDelete(null);
         } catch (error) {
             console.error("Failed to delete challenge", error);
         }
@@ -94,16 +106,23 @@ const AdminChallenges = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-3">
-                                        <button
-                                            onClick={() => toggleStatus(challenge)}
-                                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${challenge.isActive
+                                        {new Date(challenge.endDate) < new Date() ? (
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 border border-gray-200">
+                                                <XCircle size={12} />
+                                                Expired
+                                            </span>
+                                        ) : (
+                                            <button
+                                                onClick={() => toggleStatus(challenge)}
+                                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${challenge.isActive
                                                     ? 'bg-green-50 text-green-700 hover:bg-green-100'
                                                     : 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                }`}
-                                        >
-                                            {challenge.isActive ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                                            {challenge.isActive ? 'Active' : 'Inactive'}
-                                        </button>
+                                                    }`}
+                                            >
+                                                {challenge.isActive ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                                                {challenge.isActive ? 'Active' : 'Inactive'}
+                                            </button>
+                                        )}
                                     </td>
                                     <td className="px-6 py-3">
                                         <div className="flex items-center justify-center gap-2">
@@ -111,7 +130,7 @@ const AdminChallenges = () => {
                                                 <Pencil size={18} />
                                             </Link>
                                             <button
-                                                onClick={() => handleDelete(challenge._id)}
+                                                onClick={() => handleDeleteClick(challenge)}
                                                 className="p-1 text-gray-400 hover:text-red-600"
                                             >
                                                 <Trash2 size={18} />
@@ -131,6 +150,15 @@ const AdminChallenges = () => {
                     </table>
                 </div>
             </div>
+
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title="Delete Challenge?"
+                message="Are you sure you want to remove this challenge? Active users participating in this challenge will lose their progress."
+                itemName={challengeToDelete?.title}
+            />
         </div>
     );
 };

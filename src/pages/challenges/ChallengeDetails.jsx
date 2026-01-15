@@ -156,12 +156,26 @@ export default function ChallengeDetails() {
                   </h3>
                 </div>
 
-                {isJoined ? (
+                {new Date(challenge.endDate) < new Date() ? (
+                  <Button
+                    disabled
+                    className="w-full py-4 text-lg bg-gray-100 text-gray-400 border border-gray-200 rounded-2xl mb-4 cursor-not-allowed"
+                  >
+                    Challenge Expired
+                  </Button>
+                ) : isJoined ? (
                   <Button
                     onClick={handleStart}
                     className="w-full py-4 text-lg bg-green-500 hover:bg-green-600 text-white rounded-2xl shadow-xl shadow-green-100 transition-all active:scale-95 mb-4"
                   >
                     Start Cooking Now 🍳
+                  </Button>
+                ) : new Date(challenge.endDate) < new Date() ? (
+                  <Button
+                    disabled
+                    className="w-full py-4 text-lg bg-gray-100 text-gray-400 border border-gray-200 rounded-2xl mb-4 cursor-not-allowed"
+                  >
+                    Challenge Expired
                   </Button>
                 ) : (
                   <Button

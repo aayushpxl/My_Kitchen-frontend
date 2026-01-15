@@ -11,6 +11,7 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
   // Actually, to make "Unjoin" work dynamically, we should rely on the parent's data. 
   // "initialJoined" suggests it's just initial. Let's rename prop to `joined` for clarity in usage.
   const joined = initialJoined;
+  const isExpired = challenge.endDate && new Date(challenge.endDate) < new Date();
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -51,11 +52,15 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
           alt={challenge.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        {joined && (
+        {isExpired ? (
+          <div className="absolute top-4 right-4 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+            Expired
+          </div>
+        ) : joined ? (
           <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
             Active
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="p-6 flex flex-col flex-1">
@@ -87,10 +92,12 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
         <div className="mt-auto">
           <button
             onClick={handleActionClick}
-            disabled={loading}
+            disabled={loading || (isExpired && !joined)}
             className={`w-full py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] ${joined
               ? "bg-red-50 text-red-500 hover:bg-red-100 border border-red-100"
-              : "bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white"
+              : isExpired
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                : "bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white"
               }`}
           >
             {loading ? (
@@ -100,6 +107,8 @@ export default function ChallengeCard({ challenge, onJoin, onUnjoin, isJoined: i
               </span>
             ) : joined ? (
               "Unjoin Challenge"
+            ) : isExpired ? (
+              "Challenge Expired"
             ) : (
               "Join Now"
             )}
