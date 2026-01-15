@@ -119,7 +119,8 @@ const Profile = () => {
     email: '',
     phoneNumber: '',
     bio: '',
-    location: ''
+    location: '',
+    interests: []
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -132,7 +133,8 @@ const Profile = () => {
         email: user.email || '',
         phoneNumber: user.phoneNumber || '',
         bio: user.bio || '',
-        location: user.location || ''
+        location: user.location || '',
+        interests: user.interests || []
       });
       setPreviewUrl(user.profilePic ? `http://localhost:5000${user.profilePic}` : null);
     }
@@ -160,8 +162,13 @@ const Profile = () => {
     try {
       const data = new FormData();
       Object.keys(formData).forEach(key => {
-        data.append(key, formData[key]);
+        if (key === 'interests') {
+          data.append(key, JSON.stringify(formData[key]));
+        } else {
+          data.append(key, formData[key] || '');
+        }
       });
+
       if (selectedFile) {
         if (selectedFile.size > 10 * 1024 * 1024) {
           toast.error("File is too large! Maximum size allowed is 10MB.");
@@ -348,7 +355,8 @@ const Profile = () => {
                         email: user.email || '',
                         phoneNumber: user.phoneNumber || '',
                         bio: user.bio || '',
-                        location: user.location || ''
+                        location: user.location || '',
+                        interests: user.interests || []
                       });
                       setPreviewUrl(user.profilePic ? `http://localhost:5000${user.profilePic}` : null);
                       setSelectedFile(null);
@@ -367,7 +375,10 @@ const Profile = () => {
                 </div>
 
                 <div className="mt-10 border-t border-gray-100 pt-10">
-                  <Interests />
+                  <Interests
+                    selectedInterests={formData.interests}
+                    onChange={(newInterests) => setFormData(prev => ({ ...prev, interests: newInterests }))}
+                  />
                 </div>
               </div>
             )}

@@ -20,6 +20,7 @@ const AddRecipe = () => {
         category: '',
         servings: '',
         isPrivate: false,
+        status: '', // Changed to empty string to detect new recipes
         nutrition: {
             calories: '',
             protein: '',
@@ -61,6 +62,7 @@ const AddRecipe = () => {
                 category: recipe.category || '',
                 servings: recipe.servings || '',
                 isPrivate: recipe.status === 'private',
+                status: recipe.status || 'pending',
                 nutrition: recipe.nutrition || { calories: '', protein: '', carbs: '', fat: '' }
             });
             setIngredients(recipe.ingredients || []);
@@ -180,7 +182,19 @@ const AddRecipe = () => {
             data.append('difficulty', formData.difficulty);
             data.append('category', formData.category);
             data.append('servings', formData.servings);
-            data.append('status', formData.isPrivate ? 'private' : 'pending');
+
+            // Determine and append status
+            let finalStatus = formData.isPrivate ? 'private' : 'pending';
+
+            // If admin is creating or editing a non-private recipe, make it approved
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            if (user?.role === 'admin' && !formData.isPrivate) {
+                finalStatus = 'approved';
+            } else if (isEditing && !formData.isPrivate && formData.status === 'approved') {
+                // If editing and it was already approved, keep it approved
+                finalStatus = 'approved';
+            }
+            data.append('status', finalStatus);
 
             // Image (File or URL)
             if (imageFile) {
@@ -282,7 +296,7 @@ const AddRecipe = () => {
                                         <div className="h-[1px] flex-1 bg-gray-200"></div>
                                     </div>
                                     <input
-                                        type="url"
+                                        type="text"
                                         name="image"
                                         value={formData.image}
                                         onChange={handleChange}

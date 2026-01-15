@@ -27,9 +27,12 @@ import AdminRecipeDetail from "../pages/admin/AdminRecipeDetail";
 import PublicProfile from "../pages/PublicProfile";
 import AdminUserDetail from "../pages/admin/AdminUserDetail";
 
+import NotificationListener from "../components/common/NotificationListener";
+
 const AppRouter = () => {
   return (
     <BrowserRouter>
+      <NotificationListener />
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/recipes" element={<Recipes />} />

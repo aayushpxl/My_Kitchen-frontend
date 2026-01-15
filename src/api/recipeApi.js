@@ -9,7 +9,9 @@ const getAuthHeader = () => {
 };
 
 export const getAllRecipes = async () => {
-    const response = await axios.get(API_URL);
+    const response = await axios.get(API_URL, {
+        headers: getAuthHeader()
+    });
     return response.data;
 };
 
