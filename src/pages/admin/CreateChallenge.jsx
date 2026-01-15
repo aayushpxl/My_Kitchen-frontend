@@ -20,6 +20,7 @@ const CreateChallenge = () => {
         scheduleType: 'weekly',
         startDate: '',
         endDate: '',
+        category: 'Cooking',
         badgeName: '',
         badgeIcon: '🏆'
     });
@@ -40,6 +41,7 @@ const CreateChallenge = () => {
                     scheduleType: challenge.scheduleType,
                     startDate: challenge.startDate ? new Date(challenge.startDate).toISOString().split('T')[0] : '',
                     endDate: challenge.endDate ? new Date(challenge.endDate).toISOString().split('T')[0] : '',
+                    category: challenge.category || 'Cooking',
                     badgeName: challenge.badge?.name || '',
                     badgeIcon: challenge.badge?.icon || '🏆'
                 });
@@ -65,6 +67,7 @@ const CreateChallenge = () => {
             scheduleType: formData.scheduleType,
             startDate: formData.startDate,
             endDate: formData.endDate,
+            category: formData.category,
             badge: {
                 name: formData.badgeName,
                 icon: formData.badgeIcon
@@ -144,6 +147,24 @@ const CreateChallenge = () => {
                             onChange={handleChange}
                             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <select
+                            name="category"
+                            required
+                            value={formData.category}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        >
+                            <option value="Trending">Trending</option>
+                            <option value="Cooking">Cooking</option>
+                            <option value="Baking">Baking</option>
+                            <option value="Healthy">Healthy</option>
+                            <option value="Quick Meals">Quick Meals</option>
+                            <option value="Seasonal">Seasonal</option>
+                        </select>
                     </div>
                 </div>
 

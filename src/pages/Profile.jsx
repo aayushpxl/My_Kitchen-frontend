@@ -261,6 +261,13 @@ const Profile = () => {
                 🍳 My Recipes
               </button>
               <button
+                onClick={() => setActiveTab('saved')}
+                className={`w-full text-left px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'saved' ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                🔖 Saved Recipes
+              </button>
+              <button
                 onClick={() => setActiveTab('challenges')}
                 className={`w-full text-left px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'challenges' ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:bg-gray-50'
                   }`}
@@ -360,14 +367,6 @@ const Profile = () => {
                 </div>
 
                 <div className="mt-10 border-t border-gray-100 pt-10">
-                  <div className="flex items-center gap-2 mb-6">
-                    <Bookmark className="text-orange-500" size={20} />
-                    <h3 className="text-lg font-semibold text-gray-900">Saved Recipes</h3>
-                  </div>
-                  <SavedRecipesList />
-                </div>
-
-                <div className="mt-10 border-t border-gray-100 pt-10">
                   <Interests />
                 </div>
               </div>
@@ -384,6 +383,18 @@ const Profile = () => {
                   </div>
                 </div>
                 <MyRecipesList />
+              </div>
+            )}
+
+            {activeTab === 'saved' && (
+              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+                <div className="flex justify-between items-center mb-6 text-center lg:text-left">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Saved Recipes</h3>
+                    <p className="text-sm text-gray-400">Your curated collection of favorite recipes.</p>
+                  </div>
+                </div>
+                <SavedRecipesList />
               </div>
             )}
 

@@ -88,7 +88,10 @@ const AdminChallenges = () => {
                                             </div>
                                             <div>
                                                 <div className="font-medium text-gray-900">{challenge.title}</div>
-                                                <div className="text-xs text-gray-500">{challenge.scheduleType}</div>
+                                                <div className="flex gap-2">
+                                                    <span className="text-[10px] bg-orange-50 text-orange-600 px-2 py-0.5 rounded-md font-bold uppercase">{challenge.category || 'General'}</span>
+                                                    <span className="text-xs text-gray-500">{challenge.scheduleType}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
