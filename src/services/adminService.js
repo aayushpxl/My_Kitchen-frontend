@@ -54,12 +54,18 @@ const getUserById = async (id) => {
     return response.data;
 };
 
+const toggleBanUser = async (id) => {
+    const response = await axios.put(`${API_URL}/users/${id}/ban`, {}, getHeaders());
+    return response.data;
+};
+
 const adminService = {
     getDashboardStats: getDashboardStatsFixed,
     getAllUsers,
     getUserById,
     getDashboardAnalytics,
-    getRecentActivity
+    getRecentActivity,
+    toggleBanUser
 };
 
 export default adminService;

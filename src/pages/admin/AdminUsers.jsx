@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import BanModal from '../../components/ui/BanModal';
 import adminService from '../../services/adminService';
-import { 
-  Search, Mail, Trophy, Star, Users, 
-  ChevronRight, Calendar, Activity, Zap 
+import {
+    Search, Mail, Trophy, Star, Users,
+    ChevronRight, Calendar, Activity, Zap
 } from 'lucide-react';
 
 const AdminUsers = () => {
@@ -11,6 +12,7 @@ const AdminUsers = () => {
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [banModal, setBanModal] = useState({ show: false, user: null });
 
     useEffect(() => {
         fetchUsers();
@@ -110,10 +112,22 @@ const AdminUsers = () => {
                                         </div>
                                     </td>
                                     <td className="px-8 py-5">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-600 ring-1 ring-inset ring-green-200">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                            Active
-                                        </span>
+                                        {user.isBanned ? (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-600 ring-1 ring-inset ring-red-200">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                Banned
+                                            </span>
+                                        ) : !user.isActive ? (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-50 text-gray-500 ring-1 ring-inset ring-gray-200">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                                Deactivated
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-600 ring-1 ring-inset ring-green-200">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                Active
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-8 py-5">
                                         <div className="flex gap-6">
@@ -127,9 +141,17 @@ const AdminUsers = () => {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-8 py-5 text-right">
-                                        <Link 
-                                            to={`/admin/users/${user._id}`} 
+                                    <td className="px-8 py-5 text-right flex items-center justify-end gap-2">
+                                        <button
+                                            onClick={() => setBanModal({ show: true, user })}
+                                            className={`inline-flex items-center justify-center p-2.5 rounded-xl transition-all ${user.isBanned ? 'text-green-500 hover:bg-green-50' : 'text-red-500 hover:bg-red-50'}`}
+                                            title={user.isBanned ? "Unban User" : "Ban User"}
+                                        >
+                                            {user.isBanned ? <Users size={20} /> : <Users size={20} className="stroke-2" />}
+                                            {/* Using Users icon as generic placeholder, ideally use Ban/Check icon */}
+                                        </button>
+                                        <Link
+                                            to={`/admin/users/${user._id}`}
                                             className="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-all"
                                         >
                                             <ChevronRight size={20} />
@@ -141,6 +163,22 @@ const AdminUsers = () => {
                     </table>
                 </div>
             </div>
+
+            <BanModal
+                isOpen={banModal.show}
+                onClose={() => setBanModal({ show: false, user: null })}
+                username={banModal.user?.username}
+                isBanned={banModal.user?.isBanned}
+                onConfirm={async () => {
+                    try {
+                        await adminService.toggleBanUser(banModal.user._id);
+                        setBanModal({ show: false, user: null });
+                        fetchUsers();
+                    } catch (error) {
+                        console.error("Failed to update ban status");
+                    }
+                }}
+            />
         </div>
     );
 };
