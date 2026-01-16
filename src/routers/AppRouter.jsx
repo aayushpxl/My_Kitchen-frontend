@@ -26,6 +26,7 @@ import AdminModeration from "../pages/admin/AdminModeration";
 import AdminRecipeDetail from "../pages/admin/AdminRecipeDetail";
 import PublicProfile from "../pages/PublicProfile";
 import AdminUserDetail from "../pages/admin/AdminUserDetail";
+import ForgotPassword from "../pages/ForgotPassword";
 
 import NotificationListener from "../components/common/NotificationListener";
 
@@ -55,6 +56,7 @@ const AppRouter = () => {
         {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Protected Routes */}
         {/* Protected Routes */}
