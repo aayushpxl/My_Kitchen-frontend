@@ -27,6 +27,7 @@ import AdminRecipeDetail from "../pages/admin/AdminRecipeDetail";
 import PublicProfile from "../pages/PublicProfile";
 import AdminUserDetail from "../pages/admin/AdminUserDetail";
 import ForgotPassword from "../pages/ForgotPassword";
+import AboutUs from "../pages/AboutUs";
 
 import NotificationListener from "../components/common/NotificationListener";
 
@@ -40,6 +41,7 @@ const AppRouter = () => {
         <Route path="/recipes/:id" element={<RecipeDetail />} />
         <Route path="/challenges" element={<Challenges />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<AboutUs />} />
         <Route path="/users/:id" element={<PublicProfile />} />
 
 
