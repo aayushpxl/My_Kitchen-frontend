@@ -48,7 +48,7 @@ const CommunitySection = ({ recipeId, reviews = [] }) => {
             {/* Added container with max-width and horizontal padding to match "Your meal for this week" layout */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <section className="max-w-2xl"> {/* Narrower width for the form itself */}
-                    
+
                     {/* Rating Stars - Top Right Alignment */}
                     <div className="flex justify-end mb-2">
                         <div className="flex gap-1">
@@ -60,8 +60,8 @@ const CommunitySection = ({ recipeId, reviews = [] }) => {
                                     onClick={() => setRating(star)}
                                     className="transition-transform active:scale-90"
                                 >
-                                    <Star 
-                                        size={22} 
+                                    <Star
+                                        size={22}
                                         className={`${(hoverRating || rating) >= star ? 'text-orange-400 fill-orange-400' : 'text-gray-300'}`}
                                     />
                                 </button>
@@ -101,7 +101,7 @@ const CommunitySection = ({ recipeId, reviews = [] }) => {
                             reviews.map((rev) => (
                                 <div key={rev._id} className="bg-gray-50/50 rounded-2xl p-5 flex items-start gap-4 border border-gray-100 group">
                                     <img
-                                        src={getImageUrl(rev.user?.profileImage, "https://placehold.co/150x150")}
+                                        src={getImageUrl(rev.user?.profilePic, `https://ui-avatars.com/api/?name=${rev.user?.username || 'User'}&background=random&color=fff`)}
                                         alt={rev.user?.username}
                                         className="w-12 h-12 rounded-full object-cover border border-gray-200"
                                     />
@@ -111,10 +111,10 @@ const CommunitySection = ({ recipeId, reviews = [] }) => {
                                                 <span className="font-bold text-gray-800">{rev.user?.username || 'User'}</span>
                                                 <div className="flex">
                                                     {[1, 2, 3, 4, 5].map((star) => (
-                                                        <Star 
-                                                            key={star} 
-                                                            size={14} 
-                                                            className={`${rev.rating >= star ? 'text-orange-400 fill-orange-400' : 'text-gray-200'}`} 
+                                                        <Star
+                                                            key={star}
+                                                            size={14}
+                                                            className={`${rev.rating >= star ? 'text-orange-400 fill-orange-400' : 'text-gray-200'}`}
                                                         />
                                                     ))}
                                                 </div>
@@ -125,7 +125,7 @@ const CommunitySection = ({ recipeId, reviews = [] }) => {
                                         </div>
                                         <p className="text-gray-600 text-sm mt-1 leading-relaxed">{rev.comment}</p>
                                     </div>
-                                    
+
                                     {(user?._id === rev.user?._id || user?.role === 'admin') && (
                                         <button
                                             onClick={() => handleDeleteReview(rev._id)}

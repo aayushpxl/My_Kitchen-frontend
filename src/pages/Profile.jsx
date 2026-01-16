@@ -10,6 +10,7 @@ import MyRecipesList from '../components/Profile/MyRecipesList';
 import SavedRecipesList from '../components/Profile/SavedRecipesList';
 import Navbar from '../components/common/Navbar';
 import LogoutModal from '../components/ui/LogoutModal';
+import DeactivateModal from '../components/ui/DeactivateModal';
 import { updateProfile } from '../api/authApi';
 import { toast } from 'react-toastify';
 
@@ -110,6 +111,7 @@ const Profile = () => {
   const queryClient = useQueryClient();
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -284,13 +286,21 @@ const Profile = () => {
             </nav>
 
             {/* LOGOUT BUTTON */}
-            <div className="pt-4 mt-4 border-t border-gray-100">
+            <div className="pt-4 mt-4 border-t border-gray-100 space-y-2">
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-red-200 group/logout"
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-100 transition-all duration-300 shadow-sm group/logout"
               >
                 <LogOut size={18} className="transition-transform group-hover/logout:-translate-x-1" />
                 Logout Account
+              </button>
+
+              <button
+                onClick={() => setShowDeactivateModal(true)}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-red-200"
+              >
+                <span className="text-lg">⚠️</span>
+                Deactivate Account
               </button>
             </div>
           </aside>
@@ -455,7 +465,7 @@ const Profile = () => {
             )}
           </section>
         </div>
-      </main>
+      </main >
 
       <LogoutModal
         isOpen={showLogoutModal}
@@ -466,7 +476,25 @@ const Profile = () => {
           navigate('/login');
         }}
       />
-    </div>
+
+      <DeactivateModal
+        isOpen={showDeactivateModal}
+        onClose={() => setShowDeactivateModal(false)}
+        onConfirm={async () => {
+          try {
+            const { deactivateAccount } = await import('../api/authApi');
+            await deactivateAccount();
+            setShowDeactivateModal(false);
+            logout();
+            queryClient.removeQueries();
+            navigate('/login');
+            toast.success("Account deactivated.");
+          } catch (error) {
+            toast.error("Failed to deactivate account.");
+          }
+        }}
+      />
+    </div >
 
   );
 };

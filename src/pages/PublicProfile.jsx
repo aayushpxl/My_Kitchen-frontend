@@ -43,8 +43,54 @@ const PublicProfile = () => {
         fetchProfileData();
     }, [id]);
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+    if (loading) return (
+        <div className="min-h-screen bg-gray-50 pt-20 flex flex-col">
+            <Navbar />
+            <div className="flex-grow flex items-center justify-center text-gray-400">Loading...</div>
+        </div>
+    );
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 pt-20">
+                <Navbar />
+                <div className="bg-white border-b border-gray-200">
+                    <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col md:flex-row items-center gap-8 opacity-50 grayscale">
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-200">
+                            <div className="w-full h-full bg-gray-300 flex items-center justify-center text-4xl">
+                                👤
+                            </div>
+                        </div>
+                        <div className="text-center md:text-left">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                                {error === "User account is deactivated" ? "Account Deactivated" : "User Not Found"}
+                            </h1>
+                            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-gray-500 text-sm">
+                                <span className="flex items-center gap-1">🚫 No Access</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="max-w-6xl mx-auto px-4 py-20 text-center">
+                    <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm inline-block">
+                        <div className="text-6xl mb-6">🔒</div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            {error === "User account is deactivated" ? "This profile is no longer active." : "This chef hasn't set up their kitchen yet."}
+                        </h2>
+                        <p className="text-gray-500 mb-8 max-w-md mx-auto">
+                            {error === "User account is deactivated"
+                                ? "The user has deactivated their account and their profile is not currently visible."
+                                : "The user you are looking for does not exist or has been removed."}
+                        </p>
+                        <Link to="/home" className="bg-black text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors">
+                            Return Home
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pt-20">
@@ -104,7 +150,7 @@ const PublicProfile = () => {
                                 {profile.badges.map((badge, idx) => (
                                     <div key={idx} className="flex flex-col items-center bg-gray-50 p-3 rounded-xl border border-gray-100 group/badge hover:bg-orange-50 hover:border-orange-200 transition-all">
                                         <span className="text-3xl mb-1 filter group-hover/badge:drop-shadow-sm">{badge.icon}</span>
-                                        <span className="text-[10px] text-center font-bold text-gray-700 uppercase tracking-tighter leading-tight">{badge.name}</span>
+                                        <span className="text-[10px] text-center font-bold text-gray-700 uppercase tracking-tighter leading-tight">{badge.title || badge.name}</span>
                                     </div>
                                 ))}
                             </div>

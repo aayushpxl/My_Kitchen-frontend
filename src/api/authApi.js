@@ -14,3 +14,5 @@ export const updateProfile = (formData) =>
       "Content-Type": "multipart/form-data",
     },
   });
+
+export const deactivateAccount = () => api.put("/users/deactivate");
